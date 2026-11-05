@@ -1,11 +1,30 @@
 version: 2
 updates:
+  # Agrupa as atualizações de cada pasta em UM pull request. Atualizar pacotes ligados entre si
+  # (react, react-dom, @types/react...) em PRs separados deixa o main inconsistente e gera conflitos.
   - package-ecosystem: npm
     directory: /server
     schedule: { interval: weekly }
+    groups:
+      servidor:
+        patterns: ["*"]
+    ignore:
+      # A versão 13 não tem binário pronto e exige compilador C++ (Visual Studio no Windows).
+      - dependency-name: better-sqlite3
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: npm
     directory: /web
     schedule: { interval: weekly }
+    groups:
+      front-end:
+        patterns: ["*"]
+    ignore:
+      # TypeScript 7 exige declarações novas para os imports de CSS; atualize à mão quando for a hora.
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
+      # Os tipos do Node devem acompanhar o Node usado no CI e na imagem Docker.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: github-actions
     directory: /
     schedule: { interval: monthly }
