@@ -3,6 +3,7 @@ node_modules/
 dist/
 coverage/
 *.tsbuildinfo
+.vite/
 
 # Segredos e configuração local (use .env.example como modelo)
 .env
