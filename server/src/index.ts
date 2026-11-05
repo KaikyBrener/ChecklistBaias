@@ -42,11 +42,16 @@ if (semUsuarios) {
     console.log('[demo] Dados fictícios criados. Contas: coordenador, tecnico, gerente, admin — senha: demo12345');
   } else {
     const login = env.ADMIN_LOGIN ?? 'admin';
-    const senha = env.ADMIN_SENHA ?? crypto.randomBytes(9).toString('base64url');
-    criarUsuario(db, { nome: 'Administrador', login, senha, papel: 'ADMIN' }, new Date());
+    // Desenvolvimento: admin / admin (a regra de 8 caracteres é ignorada só nesse caso).
+    // Produção (NODE_ENV=production, como na imagem Docker): nunca usa senha previsível; gera uma aleatória.
+    const emProducao = env.NODE_ENV === 'production';
+    const usaPadraoDev = !env.ADMIN_SENHA && !emProducao;
+    const senha = env.ADMIN_SENHA ?? (usaPadraoDev ? 'admin' : crypto.randomBytes(9).toString('base64url'));
+    criarUsuario(db, { nome: 'Administrador', login, senha, papel: 'ADMIN' }, new Date(), { ignorarRegraSenha: usaPadraoDev });
     console.log('==================================================================');
     console.log(` Primeiro acesso criado. Login: ${login}`);
-    if (!env.ADMIN_SENHA) console.log(` Senha (aparece só desta vez): ${senha}`);
+    if (usaPadraoDev) console.log(` Senha padrão de desenvolvimento: ${senha}  (troque após o primeiro acesso)`);
+    else if (!env.ADMIN_SENHA) console.log(` Senha (aparece só desta vez): ${senha}`);
     console.log(' Entre, cadastre as centrais/baias e crie os demais usuários.');
     console.log('==================================================================');
   }

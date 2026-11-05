@@ -161,8 +161,13 @@ function validarSenha(senha: string) {
   if (senha.length < 8) throw new ErroDominio(400, 'A senha precisa ter pelo menos 8 caracteres.');
 }
 
-export function criarUsuario(db: Db, p: { nome: string; login: string; senha: string; papel: Papel }, agora: Date) {
-  validarSenha(p.senha);
+export function criarUsuario(
+  db: Db,
+  p: { nome: string; login: string; senha: string; papel: Papel },
+  agora: Date,
+  opcoes: { ignorarRegraSenha?: boolean } = {},
+) {
+  if (!opcoes.ignorarRegraSenha) validarSenha(p.senha);
   if (p.nome.trim().length < 2 || p.login.trim().length < 3) throw new ErroDominio(400, 'Informe nome e login (mínimo 3 caracteres).');
   try {
     const r = db
