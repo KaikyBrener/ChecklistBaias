@@ -1,0 +1,16 @@
+services:
+  checklist:
+    build: .
+    image: checklist-baias
+    restart: unless-stopped
+    ports:
+      - "${PORTA:-3000}:3000"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      TZ_OPERACAO: ${TZ_OPERACAO:-America/Sao_Paulo}
+    volumes:
+      - dados:/data   # banco, segredo da sessão e backups ficam aqui
+volumes:
+  dados:
