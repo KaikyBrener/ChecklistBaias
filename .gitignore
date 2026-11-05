@@ -1,0 +1,34 @@
+# Dependências e build
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Segredos e configuração local (use .env.example como modelo)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Dados de execução: banco SQLite, segredo de sessão e backups NUNCA vão para o git
+data/
+backups/
+segredo-sessao
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+npm-debug.log*
+
+# Sistema e editores
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
