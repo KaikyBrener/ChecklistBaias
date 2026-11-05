@@ -1,5 +1,5 @@
 # --- compilação (front + servidor) ---
-FROM node:22-bookworm-slim AS build
+FROM node:26-bookworm-slim AS build
 WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends python3 make g++ && rm -rf /var/lib/apt/lists/*
 COPY server/package.json server/package-lock.json server/
@@ -11,7 +11,7 @@ RUN cd web && npm run build
 RUN cd server && npm run build && npm prune --omit=dev
 
 # --- imagem final ---
-FROM node:22-bookworm-slim
+FROM node:26-bookworm-slim
 ENV NODE_ENV=production PORT=3000 DB_PATH=/data/checklist.db WEB_DIR=/app/web/dist
 WORKDIR /app/server
 COPY --from=build /app/server/node_modules node_modules
