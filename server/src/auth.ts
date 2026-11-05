@@ -88,6 +88,10 @@ export class LimiteLogin {
     }
   }
   falhou(chave: string, agora = Date.now()): void {
+    // Evita crescimento sem limite da memória com tentativas de logins aleatórios.
+    if (this.tentativas.size >= 5000) {
+      for (const [k, v] of this.tentativas) if (v.ate <= agora) this.tentativas.delete(k);
+    }
     const t = this.tentativas.get(chave);
     if (!t || t.ate <= agora) this.tentativas.set(chave, { n: 1, ate: agora + this.janelaMs });
     else t.n += 1;
