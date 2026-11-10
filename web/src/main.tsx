@@ -11,6 +11,8 @@ import './styles/base.css';
 import './styles/components.css';
 import './styles/shell.css';
 import './styles/app.css';
+import './styles/charts.css';
+import './styles/painel.css';
 import { App } from './App';
 import { aplicarTemaSalvo } from './components/Tema';
 

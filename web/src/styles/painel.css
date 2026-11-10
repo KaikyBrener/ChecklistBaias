@@ -1,0 +1,84 @@
+/* ---------- painel de monitoramento ---------- */
+.painel { display: grid; gap: var(--e-4); transition: opacity var(--dur-2); }
+.painel.recarregando { opacity: 0.6; }
+.aviso-recarga { margin: 0 0 var(--e-4); padding: var(--e-2) var(--e-3); border-radius: var(--raio-p); background: var(--atencao-fundo); color: var(--atencao); font-size: var(--fs-s); }
+.girando { animation: gira 900ms linear infinite; }
+
+/* alertas críticos: o elemento mais forte da tela, só aparece quando há equipamento parado */
+.alertas { border: 1px solid color-mix(in oklch, var(--parado-cor) 45%, var(--linha)); background: var(--parado-fundo); border-radius: var(--raio); padding: var(--e-4) var(--e-5); display: grid; gap: var(--e-3); }
+.alertas-cab { display: flex; align-items: center; gap: var(--e-2); color: var(--parado); }
+.alertas-cab h2 { font-size: var(--fs-l); }
+.alertas-lista { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: var(--e-2); }
+.alertas-lista li { display: flex; align-items: center; gap: var(--e-3); flex-wrap: wrap; padding: var(--e-2) var(--e-3); background: var(--painel); border-radius: var(--raio-p); border: 1px solid var(--linha); }
+.alertas-lista a { display: grid; flex: 1; min-width: 0; color: var(--tinta); text-decoration: none; }
+.alertas-lista a:hover b { text-decoration: underline; }
+.alertas-lista a span { color: var(--tinta-2); font-size: var(--fs-s); }
+.alertas-lista .num { color: var(--parado); font-weight: 600; font-size: var(--fs-s); }
+
+/* faixa de indicadores: um bloco, divisórias entre os números */
+.indicadores { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); background: var(--painel); border: 1px solid var(--linha); border-radius: var(--raio); }
+.indicador { display: grid; gap: 2px; align-content: start; padding: var(--e-4) var(--e-5); border-left: 1px solid var(--linha); min-width: 0; }
+.indicador:first-child { border-left: 0; }
+.indicador-rotulo { font-size: var(--fs-s); font-weight: 600; color: var(--tinta-2); }
+.indicador-valor { display: flex; align-items: center; gap: var(--e-2); font: 600 var(--fs-3xl)/1.1 var(--tit); letter-spacing: -0.02em; color: var(--tinta); }
+.indicador-nota { font-size: var(--fs-s); color: var(--tinta-2); }
+.indicador.alerta .indicador-valor { color: var(--parado); }
+
+/* grade de seções: 12 colunas no desktop */
+.painel-grade { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--e-4); align-items: start; }
+.painel-grade > * { grid-column: span 12; }
+@media (min-width: 1180px) {
+  .painel-grade > .col-4 { grid-column: span 4; }
+  .painel-grade > .col-5 { grid-column: span 5; }
+  .painel-grade > .col-7 { grid-column: span 7; }
+  .painel-grade > .col-8 { grid-column: span 8; }
+}
+@media (min-width: 720px) and (max-width: 1179px) {
+  .painel-grade > .col-4 { grid-column: span 6; }
+}
+
+/* mapa das baias */
+.mapa { display: grid; gap: var(--e-5); }
+.central-mapa header { display: flex; gap: var(--e-3); align-items: baseline; margin-bottom: var(--e-3); flex-wrap: wrap; }
+.central-mapa h3 { font-size: var(--fs-m); }
+.baias { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--e-2); }
+.baia {
+  position: relative; height: 52px; min-width: 0; border-radius: var(--raio-p); border: 1px solid var(--linha); background: var(--painel-2);
+  display: grid; place-items: center; color: var(--tinta); cursor: pointer; transition: border-color var(--dur-1), background-color var(--dur-1);
+}
+.baia:hover { border-color: var(--tinta-3); background: var(--painel-3); }
+.baia-num { font: 600 var(--fs-l) var(--tit); font-variant-numeric: tabular-nums; }
+.baia-ico { position: absolute; top: 5px; right: 5px; }
+.baia-qtd { position: absolute; bottom: 4px; right: 6px; font-size: 11px; font-weight: 700; line-height: 1; }
+.baia.ATENCAO { background: var(--atencao-fundo); border-color: var(--atencao-cor); color: var(--atencao); }
+.baia.INOPERANTE { background: var(--parado-fundo); border-color: var(--parado-cor); color: var(--parado); }
+.baia[aria-pressed="true"] { outline: 2px solid var(--foco); outline-offset: 2px; }
+.tom-atencao { color: var(--atencao-cor); } .tom-parado { color: var(--parado-cor); }
+.legenda .lg-baia { background: var(--painel-3); box-shadow: inset 0 0 0 1px var(--linha-forte); }
+.detalhe-baia { margin-top: var(--e-3); padding: var(--e-3) var(--e-4); background: var(--painel-2); border: 1px solid var(--linha); border-radius: var(--raio-p); animation: surge var(--dur-2) var(--curva); }
+.detalhe-baia ul { margin: var(--e-2) 0 0; padding: 0; list-style: none; display: grid; gap: var(--e-2); }
+.detalhe-baia li { display: flex; gap: var(--e-2); align-items: center; flex-wrap: wrap; }
+.detalhe-baia li a { font-weight: 600; margin-right: auto; }
+
+/* defeitos mais antigos */
+.lista-antigas { list-style: none; margin: 0; padding: 0; }
+.lista-antigas li + li { border-top: 1px solid var(--linha); }
+.lista-antigas-link { display: flex; align-items: center; gap: var(--e-3); padding: var(--e-3) var(--e-2); margin: 0 calc(var(--e-2) * -1); color: inherit; text-decoration: none; border-radius: var(--raio-p); transition: background-color var(--dur-1); }
+.lista-antigas-link:hover { background: var(--painel-2); }
+.lista-antigas-link:hover b { text-decoration: underline; color: var(--link); }
+.lista-antigas-txt { display: grid; flex: 1; min-width: 0; }
+.lista-antigas-txt b { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lista-antigas-tempo { font: 600 var(--fs-l) var(--tit); min-width: 5ch; text-align: right; }
+
+@media (max-width: 960px) {
+  .indicadores { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .indicador { border-left: 0; border-top: 1px solid var(--linha); }
+  .indicador:nth-child(-n+2) { border-top: 0; }
+  .indicador:nth-child(even) { border-left: 1px solid var(--linha); }
+  .indicador:last-child:nth-child(odd) { grid-column: span 2; }
+  .indicador-valor { font-size: 2rem; }
+}
+@media (max-width: 420px) {
+  .indicador { padding: var(--e-3) var(--e-4); }
+  .baia { height: 48px; }
+}
