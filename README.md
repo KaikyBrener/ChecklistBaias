@@ -65,7 +65,18 @@ cd server && npm run dev       # API em :3000
 cd web && npm ci && npm run dev   # front em :5173 com proxy para a API (API_URL muda o destino)
 ```
 
-Interface: menu lateral, tema claro/escuro (botão na barra lateral; a escolha fica salva no navegador), fontes Barlow incluídas no projeto (nada é carregado de sites externos). O guia visual de referência está em `Modelo-front/`.
+Interface: menu lateral no computador e navegação fixa embaixo no celular, tema claro/escuro (botão na barra lateral; a escolha fica salva no navegador), fontes Barlow incluídas no projeto (nada é carregado de sites externos). O guia visual de referência está em `Modelo-front/`.
+
+Organização do front (`web/src`):
+
+- `styles/tokens.css` — design system: cores em OKLCH (claro e escuro), escala tipográfica, espaçamento em base 4 px, raios e movimento. Cor é usada para estado (ok, atenção, parado) e ação; o resto é neutro.
+- `styles/base.css`, `controles.css`, `components.css`, `shell.css` — base, controles, componentes compartilhados e estrutura; um arquivo por tela (`painel.css`, `checklist.css`, `ocorrencias.css`, `cadastro.css`).
+- `components/` — peças reutilizáveis sem regra de negócio: `Icone`, `Estado` (carregando, falha com nova tentativa, vazio), `Aviso`, `Selo`, `Campo`, `Segmento`, `Pagina`, `Tema`.
+- `pages/` — uma tela por arquivo. Permissões na interface só escondem botões; quem decide é sempre o servidor.
+
+Sem estilo inline no HTML (a CSP não permite): larguras dinâmicas são aplicadas pelo React via CSSOM, que a política aceita.
+
+As decisões de interface seguiram, como referência e sem copiar código, as orientações de [frontend-design](https://github.com/anthropics/skills/tree/main/skills/frontend-design) (Anthropic, Apache-2.0), [Impeccable](https://github.com/pbakaus/impeccable) (Apache-2.0), [UI/UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) (MIT) e das skills da Vercel [web-design-guidelines](https://github.com/vercel-labs/agent-skills/tree/main/skills/web-design-guidelines), [react-best-practices](https://github.com/vercel-labs/agent-skills/tree/main/skills/react-best-practices) e [composition-patterns](https://github.com/vercel-labs/agent-skills/tree/main/skills/composition-patterns) (MIT).
 
 Stack: Node 22, Express, SQLite (better-sqlite3), zod, React + Vite + TypeScript. Gráficos em SVG puro (sem biblioteca), porque a política de segurança do servidor não permite estilo inline.
 
