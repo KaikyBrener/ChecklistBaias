@@ -44,3 +44,7 @@ button, a, [role="button"], label, select { touch-action: manipulation; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 1ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-property: color, background-color, border-color, opacity !important; }
 }
+
+@media (max-width: 520px) {
+  h1 { font-size: 1.5rem; }
+}

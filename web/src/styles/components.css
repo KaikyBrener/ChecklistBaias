@@ -46,3 +46,6 @@
 
 /* gráfico sem dados */
 .graf-vazio { padding: var(--e-6) var(--e-2); color: var(--tinta-2); font-size: var(--fs-s); text-align: center; border: 1px dashed var(--linha-forte); border-radius: var(--raio-p); }
+
+/* indicador de envio dentro de botão principal */
+.spinner.claro { width: 16px; height: 16px; border-color: color-mix(in oklch, var(--acao-tinta) 35%, transparent); border-top-color: var(--acao-tinta); }
