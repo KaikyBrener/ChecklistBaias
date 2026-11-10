@@ -1,0 +1,50 @@
+/* ---------- base: reset, tipografia e padrões do navegador no tema ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { color-scheme: light; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; scrollbar-color: var(--linha-forte) transparent; }
+html[data-tema="escuro"] { color-scheme: dark; }
+body {
+  margin: 0; min-height: 100dvh; background: var(--bg); color: var(--tinta);
+  font: 400 var(--fs-m)/1.5 var(--fonte); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
+}
+h1, h2, h3 { margin: 0; line-height: 1.15; font-family: var(--tit); font-weight: 600; letter-spacing: -0.01em; text-wrap: balance; }
+h1 { font-size: var(--fs-2xl); }
+h2 { font-size: var(--fs-xl); }
+h3 { font-size: var(--fs-l); }
+p { margin: 0; text-wrap: pretty; }
+a { color: var(--link); text-underline-offset: 3px; text-decoration-thickness: 1px; }
+a:hover { text-decoration-thickness: 2px; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button, a, [role="button"], label, select { touch-action: manipulation; }
+:focus-visible { outline: 2px solid var(--foco); outline-offset: 2px; border-radius: var(--raio-s); }
+::selection { background: color-mix(in oklch, var(--sinal) 45%, transparent); color: var(--tinta); }
+::placeholder { color: var(--tinta-3); opacity: 1; }
+
+/* utilitários */
+.sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.muted { color: var(--tinta-2); }
+.small { font-size: var(--fs-s); }
+.num { font-variant-numeric: tabular-nums; }
+.espaco { flex: 1; }
+.linha { display: flex; gap: var(--e-3); align-items: center; flex-wrap: wrap; }
+
+/* pular para o conteúdo (aparece só com teclado) */
+.pular {
+  position: fixed; left: var(--e-3); top: var(--e-3); z-index: var(--z-dica); padding: var(--e-2) var(--e-4);
+  background: var(--acao); color: var(--acao-tinta); border-radius: var(--raio-p); font-weight: 600; text-decoration: none;
+  transform: translateY(-200%); transition: transform var(--dur-2) var(--curva);
+}
+.pular:focus-visible { transform: none; }
+
+@keyframes gira { to { transform: rotate(360deg); } }
+@keyframes pulso { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+@keyframes surge { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+/* Movimento reduzido: tira deslocamento e laços decorativos, mantém mudanças de cor/opacidade. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 1ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-property: color, background-color, border-color, opacity !important; }
+}
+
+@media (max-width: 520px) {
+  h1 { font-size: 1.5rem; }
+}

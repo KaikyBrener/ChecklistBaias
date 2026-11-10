@@ -1,0 +1,53 @@
+/* ---------- gráficos em SVG (src/charts.tsx) ---------- */
+.graf { min-width: 0; }
+.graf svg { width: 100%; height: auto; display: block; overflow: visible; }
+.graf text { fill: var(--tinta-2); font-size: 12.5px; font-family: var(--fonte); }
+.graf .rot-forte { fill: var(--tinta); font-weight: 600; }
+.graf .grade-l { stroke: var(--linha); stroke-width: 1; }
+.graf .eixo { stroke: var(--linha-forte); stroke-width: 1; }
+.graf .barra { fill: var(--barra); } .graf .sa { fill: var(--serie-a); } .graf .sb { fill: var(--serie-b); }
+.graf .trilho { fill: var(--trilho); }
+.graf .ok { fill: var(--ok-cor); } .graf .at { fill: var(--atencao-cor); } .graf .pa { fill: var(--parado-cor); }
+.graf rect.alvo { fill: transparent; }
+.graf g.col { outline: none; }
+.graf g.col:hover rect.alvo, .graf g.col:focus-visible rect.alvo { fill: var(--acao-suave); }
+.graf g.col:focus-visible rect.alvo { stroke: var(--foco); stroke-width: 2; }
+
+.dica {
+  position: fixed; z-index: var(--z-dica); background: var(--tinta); color: var(--painel); padding: 6px 10px; border-radius: var(--raio-p);
+  font-size: var(--fs-xs); font-weight: 500; pointer-events: none; max-width: 260px; box-shadow: var(--sombra-flutuante); font-variant-numeric: tabular-nums;
+}
+
+/* legenda */
+.legenda { display: flex; gap: var(--e-2) var(--e-4); flex-wrap: wrap; font-size: var(--fs-s); color: var(--tinta-2); margin: var(--e-3) 0 0; padding: 0; list-style: none; }
+.legenda li, .legenda span { display: inline-flex; align-items: center; gap: 6px; }
+.legenda i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; flex: none; }
+.legenda b { color: var(--tinta); }
+.legenda-lista { display: grid; gap: var(--e-2); }
+.legenda-lista li { display: grid; grid-template-columns: 10px 1fr auto 3.5ch; gap: var(--e-2); align-items: center; }
+.legenda-lista li .muted { text-align: right; }
+.lg-a { background: var(--serie-a); } .lg-b { background: var(--serie-b); }
+.lg-ok { background: var(--ok-cor); } .lg-at { background: var(--atencao-cor); } .lg-pa { background: var(--parado-cor); }
+
+/* tabela alternativa ao gráfico */
+.como-tabela { margin-top: var(--e-3); }
+.como-tabela summary { cursor: pointer; font-size: var(--fs-s); color: var(--link); width: fit-content; padding: var(--e-1) 0; }
+.como-tabela .tabela-wrap { max-height: 280px; overflow-y: auto; margin-top: var(--e-2); }
+
+/* progresso */
+.progresso { height: 8px; background: var(--trilho); border-radius: var(--raio-pilula); overflow: hidden; }
+.progresso svg { display: block; width: 100%; height: 8px; }
+.progresso .fill { fill: var(--acao); transition: width var(--dur-3) var(--curva); }
+.progresso.completo .fill { fill: var(--ok-cor); }
+
+/* barras horizontais */
+.barras { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.barras li { display: grid; grid-template-columns: minmax(0, 34%) minmax(0, 1fr) max-content; gap: var(--e-3); align-items: center; min-height: 30px; font-size: var(--fs-s); }
+.barras-rot { color: var(--tinta-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.barras-trilho { width: 100%; height: 10px; display: block; }
+.barras-val { font-weight: 600; color: var(--tinta); white-space: nowrap; }
+/* em telas estreitas o SVG das colunas encolhe; o texto compensa para continuar legível */
+@media (max-width: 640px) {
+  .graf .serie text { font-size: 21px; }
+  .barras li { grid-template-columns: minmax(0, 46%) minmax(0, 1fr) max-content; gap: var(--e-2); }
+}

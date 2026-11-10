@@ -1,0 +1,62 @@
+/* ---------- controles e primitivas: superfície, botão, campo, selo, segmento, tabela ---------- */
+.card { background: var(--painel); border: 1px solid var(--linha); border-radius: var(--raio); padding: var(--e-5) var(--e-6); }
+.card h2 { margin-bottom: var(--e-4); font-size: var(--fs-l); }
+.btn {
+  min-height: var(--alvo); padding: var(--e-2) var(--e-4); border-radius: var(--raio-p); border: 1px solid var(--linha-forte); background: var(--painel);
+  font-weight: 600; font-size: var(--fs-s); line-height: 1.2; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: var(--e-2);
+  text-decoration: none; color: var(--tinta); white-space: nowrap;
+  transition: background-color var(--dur-1), border-color var(--dur-1), color var(--dur-1), transform var(--dur-1);
+}
+.btn:hover:not(:disabled) { background: var(--painel-2); border-color: var(--tinta-3); }
+.btn:active:not(:disabled) { transform: translateY(1px); }
+.btn:disabled { color: var(--tinta-3); border-color: var(--linha); background: var(--painel-2); cursor: not-allowed; }
+.btn.prim { background: var(--acao); border-color: var(--acao); color: var(--acao-tinta); }
+.btn.prim:hover:not(:disabled) { background: var(--acao-hover); border-color: var(--acao-hover); }
+.btn.prim:disabled { opacity: 0.55; color: var(--acao-tinta); background: var(--acao); border-color: var(--acao); }
+.btn.peq { min-height: 36px; padding: var(--e-1) var(--e-3); font-size: var(--fs-s); }
+.btn.ghost { border-color: transparent; background: transparent; color: var(--tinta-2); }
+.btn.ghost:hover:not(:disabled) { background: var(--painel-3); border-color: transparent; color: var(--tinta); }
+label.campo { display: grid; gap: 6px; font-weight: 600; font-size: var(--fs-s); color: var(--tinta); }
+input[type=text], input[type=password], input[type=number], input[type=date], input[type=search], select, textarea {
+  min-height: var(--alvo); padding: var(--e-2) var(--e-3); border: 1px solid var(--linha-forte); border-radius: var(--raio-p); background: var(--painel); width: 100%;
+  font-weight: 400; font-size: var(--fs-m); color: var(--tinta); transition: border-color var(--dur-1), box-shadow var(--dur-1);
+}
+select { background-color: var(--painel); color: var(--tinta); }
+input:hover, select:hover, textarea:hover { border-color: var(--tinta-3); }
+input:focus-visible, select:focus-visible, textarea:focus-visible { outline: none; border-color: var(--foco); box-shadow: 0 0 0 1px var(--foco), 0 0 0 4px color-mix(in oklch, var(--foco) 22%, transparent); }
+textarea { min-height: 84px; resize: vertical; line-height: 1.45; }
+.vazio-lateral { padding: var(--e-16) var(--e-6); border-style: dashed; background: transparent; }
+.spinner { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--trilho); border-top-color: var(--acao); animation: gira 700ms linear infinite; }
+.voltar { display: inline-flex; align-items: center; gap: 2px; margin-bottom: var(--e-3); font-weight: 500; font-size: var(--fs-s); color: var(--link); }
+.mais { margin: var(--e-4) 0 0; font-weight: 500; font-size: var(--fs-s); }
+
+/* etiquetas de situação (pílulas, como no template) */
+.selo { display: inline-flex; align-items: center; gap: 5px; padding: 2px 10px; border-radius: var(--raio-pilula); font-size: var(--fs-xs); font-weight: 600; line-height: 1.5; white-space: nowrap; background: var(--painel-3); color: var(--tinta-2); }
+.selo.ok { background: var(--ok-fundo); color: var(--ok); }
+.selo.atencao { background: var(--atencao-fundo); color: var(--atencao); }
+.selo.parado { background: var(--parado-fundo); color: var(--parado); }
+.selo.papel { background: var(--acao-suave); color: var(--link); }
+
+/* seletor de período */
+.segmento { display: inline-flex; border: 1px solid var(--linha-forte); border-radius: var(--raio-p); overflow: hidden; background: var(--painel); }
+.segmento button { min-height: 42px; padding: 6px var(--e-4); border: 0; background: transparent; cursor: pointer; font-weight: 500; font-size: var(--fs-s); color: var(--tinta-2); border-right: 1px solid var(--linha); transition: background-color var(--dur-1), color var(--dur-1); }
+.segmento button:last-child { border-right: 0; }
+.segmento button:hover { background: var(--painel-2); color: var(--tinta); }
+.segmento button[aria-pressed="true"] { background: var(--tinta); color: var(--painel); font-weight: 600; }
+:root[data-tema="escuro"] .segmento button[aria-pressed="true"] { background: var(--acao); color: var(--acao-tinta); }
+
+.tabela-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 0.9375rem; }
+th, td { text-align: left; padding: var(--e-3); border-bottom: 1px solid var(--linha); vertical-align: middle; }
+th { color: var(--tinta-2); font-weight: 600; font-size: var(--fs-xs); white-space: nowrap; padding-top: var(--e-1); }
+tbody tr:last-child td { border-bottom: 0; }
+tr.sel td { background: var(--acao-suave); }
+tbody tr.clic { cursor: pointer; } tbody tr.clic:hover td { background: var(--painel-2); }
+.tabela-wrap td:nth-child(2) { white-space: nowrap; }
+td.num { white-space: nowrap; }
+
+
+/* ---------- responsivo ---------- */
+@media (max-width: 520px) {
+  .segmento button { padding: 6px var(--e-3); }
+}
