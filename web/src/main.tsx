@@ -14,6 +14,7 @@ import './styles/app.css';
 import './styles/charts.css';
 import './styles/painel.css';
 import './styles/checklist.css';
+import './styles/ocorrencias.css';
 import { App } from './App';
 import { aplicarTemaSalvo } from './components/Tema';
 

@@ -64,14 +64,7 @@ tr.inativo td { opacity: 0.55; } tr.inativo td:last-child { opacity: 1; }
 td.num { white-space: nowrap; }
 
 
-/* ---------- ocorrências ---------- */
-.duas { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: var(--e-4); align-items: start; }
-.detalhe-oc { position: sticky; top: var(--e-5); }
-.linha-tempo { list-style: none; margin: var(--e-4) 0 0; padding: 0 0 0 var(--e-3); border-left: 1px solid var(--linha-forte); display: grid; gap: var(--e-4); }
-.linha-tempo li { position: relative; padding-left: var(--e-4); }
-.linha-tempo li::before { content: ""; position: absolute; left: -18px; top: 6px; width: 11px; height: 11px; border-radius: 50%; background: var(--linha-forte); border: 2px solid var(--painel); }
-.linha-tempo li:last-child::before { background: var(--atencao-cor); }
-.linha-tempo li.fim::before { background: var(--ok-cor); }
+/* ---------- formulários em linha e espaçamentos ---------- */
 .filtros { display: flex; gap: var(--e-3); flex-wrap: wrap; align-items: end; margin-bottom: var(--e-4); }
 .filtros label.campo { min-width: 180px; }
 .sep { margin-top: var(--e-8); } .sep0 { margin-bottom: var(--e-4); }
@@ -79,10 +72,6 @@ td.num { white-space: nowrap; }
 form.grade { align-content: start; } form.grade .btn.prim { justify-self: start; }
 
 /* ---------- responsivo ---------- */
-@media (max-width: 960px) {
-  .detalhe-oc { position: static; }
-  .duas { grid-template-columns: 1fr; }
-}
 @media (max-width: 520px) {
   .segmento button { padding: 6px var(--e-3); }
 }
