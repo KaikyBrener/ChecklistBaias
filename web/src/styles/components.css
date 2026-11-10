@@ -49,3 +49,11 @@
 
 /* indicador de envio dentro de botão principal */
 .spinner.claro { width: 16px; height: 16px; border-color: color-mix(in oklch, var(--acao-tinta) 35%, transparent); border-top-color: var(--acao-tinta); }
+
+/* opções em botão (radio) */
+.radios { display: flex; gap: var(--e-2); flex-wrap: wrap; }
+.radios label { display: inline-flex; align-items: center; gap: var(--e-2); min-height: 48px; padding: 6px var(--e-4); border: 1px solid var(--linha-forte); border-radius: var(--raio-p); cursor: pointer; font-weight: 500; background: var(--painel); transition: border-color var(--dur-1), background-color var(--dur-1); }
+.radios label:hover { border-color: var(--tinta-3); }
+.radios label:has(input:checked) { border-color: var(--acao); box-shadow: inset 0 0 0 1px var(--acao); background: var(--acao-suave); font-weight: 600; }
+.radios input { width: 18px; height: 18px; margin: 0; accent-color: var(--acao); }
+fieldset.radios { border: 0; padding: 0; margin: 0; } fieldset.radios legend { width: 100%; padding: 0 0 var(--e-2); color: var(--tinta-2); font-size: var(--fs-s); }
