@@ -32,8 +32,6 @@
 .faixa-demo { background: var(--atencao-fundo); color: var(--atencao); text-align: center; font-size: var(--fs-xs); padding: 6px var(--e-3); font-weight: 600; border-bottom: 1px solid color-mix(in oklch, var(--atencao-cor) 40%, transparent); }
 .conteudo { min-width: 0; }
 main { max-width: var(--largura-max); margin: 0 auto; padding: var(--e-8) var(--e-8) var(--e-16); }
-.cab { display: flex; justify-content: space-between; gap: var(--e-4); align-items: flex-end; flex-wrap: wrap; margin-bottom: var(--e-6); }
-.cab p { margin: var(--e-1) 0 0; max-width: 72ch; }
 
 /* ---------- componentes ---------- */
 .card { background: var(--painel); border: 1px solid var(--linha); border-radius: var(--raio); padding: var(--e-5) var(--e-6); }
@@ -69,11 +67,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: non
 textarea { min-height: 84px; resize: vertical; line-height: 1.45; }
 .erro { background: var(--parado-fundo); color: var(--parado); border-radius: var(--raio-p); padding: var(--e-3) var(--e-4); font-weight: 500; }
 .aviso { background: var(--atencao-fundo); color: var(--atencao); border-radius: var(--raio-p); padding: var(--e-3) var(--e-4); }
-.vazio { padding: var(--e-10) var(--e-3); text-align: center; color: var(--tinta-2); display: grid; justify-items: center; gap: var(--e-3); }
-.vazio-ico { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--painel-2); border: 1px solid var(--linha); color: var(--tinta-3); }
-.vazio-ico.ok { background: var(--ok-fundo); color: var(--ok); border-color: transparent; font-weight: 700; }
 .vazio-lateral { padding: var(--e-16) var(--e-6); border-style: dashed; background: transparent; }
-.carregando { display: flex; align-items: center; justify-content: center; gap: var(--e-3); padding: var(--e-12) var(--e-3); color: var(--tinta-2); font-weight: 500; }
 .spinner { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--trilho); border-top-color: var(--acao); animation: gira 700ms linear infinite; }
 .voltar { display: inline-flex; align-items: center; gap: 2px; margin-bottom: var(--e-3); font-weight: 500; font-size: var(--fs-s); color: var(--link); }
 .mais { margin: var(--e-4) 0 0; font-weight: 500; font-size: var(--fs-s); }

@@ -1,6 +1,10 @@
 import { useState } from 'react';
-import { Carregando, Ico } from '../ui';
-import { SEV_ROTULO, STATUS_ROTULO, fmtData, fmtDur, get, desde, type Severidade, type Status } from '../api';
+import { Carregando, Falha, Vazio } from '../components/Estado';
+import { Icone, type NomeIcone } from '../components/Icone';
+import { CabecalhoPagina } from '../components/Pagina';
+import { SeloSeveridade, SeloStatus } from '../components/Selo';
+import { Segmento } from '../components/Segmento';
+import { STATUS_ROTULO, fmtData, fmtDur, get, desde, type Severidade, type Status } from '../api';
 import { BarList, Empilhada, SerieDiaria } from '../charts';
 import { useDados, useSessao } from '../ctx';
 
@@ -19,10 +23,10 @@ interface Painel {
   maisAntigas: Array<{ id: number; equipamento: string; local: string; severidade: Severidade; status: Status; horas: number }>;
 }
 
-function Kpi({ valor, rotulo, titulo, icone, tom, alerta }: { valor: string; rotulo: string; titulo: string; icone: string; tom: 'perigo' | 'info' | 'ok' | 'atencao'; alerta?: boolean }) {
+function Kpi({ valor, rotulo, titulo, icone, tom, alerta }: { valor: string; rotulo: string; titulo: string; icone: NomeIcone; tom: 'perigo' | 'info' | 'ok' | 'atencao'; alerta?: boolean }) {
   return (
     <div className={'kpi' + (alerta ? ' alerta' : '')}>
-      <div className="kpi-topo"><span className="kpi-titulo">{titulo}</span><span className={'kpi-ico ' + tom}><Ico nome={icone} /></span></div>
+      <div className="kpi-topo"><span className="kpi-titulo">{titulo}</span><span className={'kpi-ico ' + tom}><Icone nome={icone} /></span></div>
       <div className="v">{valor}</div>
       <div className="r">{rotulo}</div>
     </div>
@@ -36,7 +40,7 @@ export function Painel() {
   const [sel, setSel] = useState<{ central: number; baia: number } | null>(null);
   const podeCsv = usuario.papel === 'GERENTE' || usuario.papel === 'TI' || usuario.papel === 'ADMIN';
 
-  if (erro) return <div className="erro" role="alert">{erro}</div>;
+  if (erro && !p) return <Falha mensagem={erro} onTentar={recarregar} />;
   if (!p) return <Carregando texto="Carregando painel…" />;
   const r = p.resumo, a = p.aderencia;
   const baiaSel = sel ? p.mapa.find((c) => c.id === sel.central)?.baias.find((b) => b.numero === sel.baia) : undefined;
@@ -44,24 +48,16 @@ export function Painel() {
 
   return (
     <>
-      <div className="cab">
-        <div>
-          <h1>Painel</h1>
-          <p className="muted small">Atualizado às {fmtData(p.geradoEm, tz, 'hora')}. Os números do período contam o que foi aberto e resolvido nos últimos {p.dias} dias.</p>
-        </div>
-        <div className="linha">
-          <div className="segmento" role="group" aria-label="Período">
-            {[7, 30, 90].map((d) => (
-              <button key={d} type="button" aria-pressed={dias === d} onClick={() => setDias(d)}>{d} dias</button>
-            ))}
-          </div>
-          <button className="btn" onClick={recarregar}>Atualizar</button>
-          {podeCsv && <a className="btn" href={`/api/ocorrencias.csv?dias=${dias}&situacao=todas`}>Baixar planilha (CSV)</a>}
-        </div>
-      </div>
+      <CabecalhoPagina titulo="Painel" acoes={<>
+        <Segmento rotulo="Período" valor={dias} onMudar={setDias} opcoes={[7, 30, 90].map((d) => ({ valor: d, texto: `${d} dias` }))} />
+        <button className="btn" onClick={recarregar}>Atualizar</button>
+        {podeCsv && <a className="btn" href={`/api/ocorrencias.csv?dias=${dias}&situacao=todas`}>Baixar planilha (CSV)</a>}
+      </>}>
+        Atualizado às {fmtData(p.geradoEm, tz, 'hora')}. Os números do período contam o que foi aberto e resolvido nos últimos {p.dias} dias.
+      </CabecalhoPagina>
 
       <div className="kpis">
-        <Kpi titulo="Defeitos agora" icone="/ocorrencias" tom="perigo" valor={String(r.abertasAgora)} rotulo="equipamentos com defeito" alerta={r.abertasAgora > 0} />
+        <Kpi titulo="Defeitos agora" icone="ocorrencias" tom="perigo" valor={String(r.abertasAgora)} rotulo="equipamentos com defeito" alerta={r.abertasAgora > 0} />
         <Kpi titulo="Parados" icone="parado" tom="perigo" valor={String(r.inoperantes)} rotulo="não funcionam" alerta={r.inoperantes > 0} />
         <Kpi titulo="Tempo até resolver" icone="relogio" tom="info" valor={fmtDur(r.mttrHoras)} rotulo="média no período" />
         <Kpi titulo="Checklist no prazo" icone="certo" tom="ok" valor={r.aderenciaPct == null ? '–' : r.aderenciaPct + '%'} rotulo={`até ${prazoChecklistMin} min do início do turno`} />
@@ -95,8 +91,8 @@ export function Painel() {
                 <ul>{baiaSel.abertas.map((o) => (
                   <li key={o.id} className="linha">
                     <span>{o.equipamento}</span>
-                    <span className={'selo ' + (o.severidade === 'INOPERANTE' ? 'parado' : 'atencao')}>{SEV_ROTULO[o.severidade]}</span>
-                    <span className="selo">{STATUS_ROTULO[o.status]}</span>
+                    <SeloSeveridade severidade={o.severidade} />
+                    <SeloStatus status={o.status} />
                     <span className="muted small">há {fmtDur(desde(o.desde))}</span>
                     <a href={`#/ocorrencias/${o.id}`}>Ver</a>
                   </li>))}</ul>
@@ -107,14 +103,14 @@ export function Painel() {
 
         <section className="card" aria-labelledby="h-ant">
           <h2 id="h-ant">Defeitos abertos há mais tempo</h2>
-          {p.maisAntigas.length === 0 ? <div className="vazio"><span className="vazio-ico ok" aria-hidden="true">✓</span>Nenhum defeito aberto. Tudo funcionando!</div> : (
+          {p.maisAntigas.length === 0 ? <Vazio tom="ok" icone="certo" titulo="Nenhum defeito aberto">Todos os equipamentos estão funcionando.</Vazio> : (
             <><div className="tabela-wrap"><table>
               <thead><tr><th>Equipamento</th><th>Local</th><th>Situação</th><th>Aberto há</th></tr></thead>
               <tbody>{p.maisAntigas.map((o) => (
                 <tr key={o.id} className="clic" onClick={() => { location.hash = `#/ocorrencias/${o.id}`; }}>
                   <td><a href={`#/ocorrencias/${o.id}`}>{o.equipamento}</a></td>
                   <td>{o.local}</td>
-                  <td><span className={'selo ' + (o.severidade === 'INOPERANTE' ? 'parado' : 'atencao')}>{SEV_ROTULO[o.severidade]}</span> <span className="small muted">{STATUS_ROTULO[o.status]}</span></td>
+                  <td><SeloSeveridade severidade={o.severidade} /> <span className="small muted">{STATUS_ROTULO[o.status]}</span></td>
                   <td className="num">{fmtDur(o.horas)}</td>
                 </tr>))}</tbody></table></div><p className="mais"><a href="#/ocorrencias">Ver todas as ocorrências</a></p></>
           )}

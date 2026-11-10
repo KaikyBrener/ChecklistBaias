@@ -5,7 +5,10 @@ import { Painel } from './pages/Painel';
 import { Checklist } from './pages/Checklist';
 import { Ocorrencias } from './pages/Ocorrencias';
 import { Cadastro } from './pages/Cadastro';
-import { BotaoTema, Carregando, Ico } from './ui';
+import { Carregando } from './components/Estado';
+import { Icone, type NomeIcone } from './components/Icone';
+import { BotaoTema } from './components/Tema';
+import { Aviso } from './components/Aviso';
 
 function IconeMarca() {
   return (
@@ -37,7 +40,7 @@ function TurnoCard({ turno, inicio, fim, tz }: { turno: 'DIA' | 'NOITE'; inicio:
   return (
     <div className={'turno-chip ' + (turno === 'DIA' ? 'dia' : 'noite')} title="Turno em andamento">
       <div className="turno-topo"><span>Turno em andamento</span><span className="aovivo"><i aria-hidden="true" />ao vivo</span></div>
-      <b className="turno-nome"><Ico nome={turno === 'DIA' ? 'sol' : 'lua'} />{turno === 'DIA' ? 'Dia' : 'Noite'} · {fmtData(inicio, tz, 'hora')}–{fmtData(fim, tz, 'hora')}</b>
+      <b className="turno-nome"><Icone nome={turno === 'DIA' ? 'sol' : 'lua'} />{turno === 'DIA' ? 'Dia' : 'Noite'} · {fmtData(inicio, tz, 'hora')}–{fmtData(fim, tz, 'hora')}</b>
       <div className="turno-barra" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pct)} aria-label="Andamento do turno"><i style={{ width: pct + '%' }} /></div>
       <small>Termina em {Math.floor(falta / 60)} h {String(falta % 60).padStart(2, '0')} min</small>
     </div>
@@ -93,7 +96,7 @@ function Login({ onEntrou }: { onEntrou: () => void }) {
           )}
           <label className="campo">Usuário<input type="text" autoComplete="username" value={login} onChange={(e) => setLogin(e.target.value)} required autoFocus /></label>
           <label className="campo">Senha<input type="password" autoComplete="current-password" value={senha} onChange={(e) => setSenha(e.target.value)} required /></label>
-          {erro && <div className="erro" role="alert">{erro}</div>}
+          {erro && <Aviso tom="erro">{erro}</Aviso>}
           <button className="btn prim" disabled={enviando}>{enviando ? 'Entrando…' : 'Entrar'}</button>
         </form>
       </div>
@@ -141,14 +144,14 @@ export function App() {
         <aside className="lateral">
           <Marca />
           <nav className="nav" aria-label="Seções">
-            {abas.map((a) => <a key={a.id} href={'#' + a.id} aria-current={a.id === ativa.id ? 'page' : undefined}><Ico nome={a.id} />{a.nome}</a>)}
+            {abas.map((a) => <a key={a.id} href={'#' + a.id} aria-current={a.id === ativa.id ? 'page' : undefined}><Icone nome={a.id.slice(1) as NomeIcone} />{a.nome}</a>)}
           </nav>
           <TurnoCard turno={t.turno} inicio={t.inicio} fim={t.fim} tz={sessao.tz} />
           <div className="quem">
             <span className="avatar" aria-hidden="true">{sessao.usuario.nome.trim().charAt(0).toUpperCase()}</span>
             <span className="quem-nome"><b>{sessao.usuario.nome}</b><small>{PAPEL_ROTULO[papel]}</small></span>
             <BotaoTema />
-            <button className="icone-btn" onClick={sair} title="Sair do sistema" aria-label="Sair do sistema"><Ico nome="sair" /></button>
+            <button className="icone-btn" onClick={sair} title="Sair do sistema" aria-label="Sair do sistema"><Icone nome="sair" /></button>
           </div>
         </aside>
         <div className="conteudo">

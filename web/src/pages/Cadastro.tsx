@@ -1,11 +1,15 @@
 import { useState } from 'react';
 import { PAPEL_ROTULO, get, patch, post, type Papel } from '../api';
 import { useDados } from '../ctx';
+import { Aviso } from '../components/Aviso';
+import { Falha } from '../components/Estado';
+import { CabecalhoPagina } from '../components/Pagina';
+import { Selo } from '../components/Selo';
 
 export function Cadastro() {
   return (
     <>
-      <div className="cab"><div><h1>Cadastro</h1><p className="muted">Centrais, baias e quem pode entrar no sistema.</p></div></div>
+      <CabecalhoPagina titulo="Cadastro">Centrais, baias e quem pode entrar no sistema.</CabecalhoPagina>
       <div className="grade g2"><Centrais /><Usuarios /></div>
     </>
   );
@@ -20,7 +24,7 @@ function Centrais() {
   return (
     <section className="card">
       <h2>Centrais e baias</h2>
-      {erro && <div className="erro">{erro}</div>}{msg && <div className="erro" role="alert">{msg}</div>}
+      {erro && <Falha mensagem={erro} onTentar={recarregar} />}{msg && <Aviso tom="erro" onFechar={() => setMsg('')}>{msg}</Aviso>}
       {dados?.map((c) => {
         const f = de[c.id] ?? { de: String(c.baias + 1), ate: String(c.baias + 1) };
         return (
@@ -49,11 +53,11 @@ function Usuarios() {
   return (
     <section className="card">
       <h2>Usuários</h2>
-      {erro && <div className="erro">{erro}</div>}{msg && <div className={msg.startsWith('Senha de') ? 'aviso' : 'erro'} role="alert">{msg}</div>}
+      {erro && <Falha mensagem={erro} onTentar={recarregar} />}{msg && <Aviso tom={msg.startsWith('Senha de') ? 'sucesso' : 'erro'} onFechar={() => setMsg('')}>{msg}</Aviso>}
       <div className="tabela-wrap"><table>
         <thead><tr><th>Nome</th><th>Usuário</th><th>Perfil</th><th></th></tr></thead>
         <tbody>{dados?.map((u) => (
-          <tr key={u.id} className={u.ativo ? '' : 'inativo'}><td><b>{u.nome}</b>{!u.ativo && <> <span className="selo">Inativo</span></>}</td><td className="muted">{u.login}</td><td><span className="selo papel">{PAPEL_ROTULO[u.papel]}</span></td>
+          <tr key={u.id} className={u.ativo ? '' : 'inativo'}><td><b>{u.nome}</b>{!u.ativo && <> <Selo>Inativo</Selo></>}</td><td className="muted">{u.login}</td><td><Selo tom="papel">{PAPEL_ROTULO[u.papel]}</Selo></td>
             <td>{redef?.id === u.id ? (
               <form className="linha" onSubmit={async (e) => { e.preventDefault(); if (await tentar(() => patch(`/usuarios/${u.id}`, { senha: redef.senha }))) { setRedef(null); setMsg(`Senha de ${u.nome} alterada.`); } }}>
                 <input type="password" aria-label={`Nova senha de ${u.nome}`} autoComplete="new-password" minLength={8} required value={redef.senha} onChange={(e) => setRedef({ id: u.id, senha: e.target.value })} placeholder="Nova senha (8+)" />

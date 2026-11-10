@@ -2,7 +2,10 @@ import { useState } from 'react';
 import { ErroApi, SEV_ROTULO, fmtData, fmtDur, desde, get, post, put, type Severidade } from '../api';
 import { Progresso } from '../charts';
 import { useDados, useSessao } from '../ctx';
-import { Carregando, Voltar } from '../ui';
+import { Aviso } from '../components/Aviso';
+import { Carregando, Falha, Vazio } from '../components/Estado';
+import { CabecalhoPagina, Voltar } from '../components/Pagina';
+import { Selo, SeloSeveridade } from '../components/Selo';
 
 interface Item {
   id: number; nome: string; tipo: string; resultado: 'OK' | 'DEFEITO' | 'NA' | null; severidade: Severidade | null; observacao: string;
@@ -21,7 +24,7 @@ export function Checklist({ rota }: { rota: string }) {
 
 function Lista() {
   const { tz, usuario } = useSessao();
-  const { dados: t, erro } = useDados(() => get('/turno-atual'), []);
+  const { dados: t, erro, recarregar } = useDados(() => get('/turno-atual'), []);
   const { dados: hist } = useDados(() => get<any[]>('/checklists?limite=20'), []);
   const [msg, setMsg] = useState('');
   const pode = usuario.papel === 'COORDENADOR' || usuario.papel === 'ADMIN';
@@ -29,24 +32,23 @@ function Lista() {
     try { const r = await post('/checklists', { central_id: centralId }); location.hash = `#/checklist/${r.id}`; }
     catch (e) { setMsg((e as Error).message); }
   }
-  if (erro) return <div className="erro" role="alert">{erro}</div>;
-  if (!t) return <Carregando />;
+  if (erro && !t) return <Falha mensagem={erro} onTentar={recarregar} />;
+  if (!t) return <Carregando texto="Carregando checklists…" />;
   return (
     <>
-      <div className="cab"><div>
-        <h1>Checklist do turno</h1>
-        <p className="muted">Turno {t.turno === 'DIA' ? 'do dia' : 'da noite'}, {fmtData(t.inicio, tz, 'hora')} às {fmtData(t.fim, tz, 'hora')}. Cada central tem um checklist por turno.</p>
-      </div></div>
-      {msg && <div className="erro" role="alert">{msg}</div>}
+      <CabecalhoPagina titulo="Checklist do turno">
+        Turno {t.turno === 'DIA' ? 'do dia' : 'da noite'}, {fmtData(t.inicio, tz, 'hora')} às {fmtData(t.fim, tz, 'hora')}. Cada central tem um checklist por turno.
+      </CabecalhoPagina>
+      {msg && <Aviso tom="erro" onFechar={() => setMsg('')}>{msg}</Aviso>}
       <div className="grade g2">
         {t.centrais.map((c: any) => {
           const k = c.checklist;
           return (
             <section key={c.id} className="card central-card">
               <div className="linha"><h2>{c.nome}</h2><span className="espaco" />
-                {!k && <span className="selo">Não iniciado</span>}
-                {k?.status === 'EM_ANDAMENTO' && <span className="selo atencao">Em andamento</span>}
-                {k?.status === 'CONCLUIDO' && <span className="selo ok">Concluído</span>}
+                {!k && <Selo>Não iniciado</Selo>}
+                {k?.status === 'EM_ANDAMENTO' && <Selo tom="atencao">Em andamento</Selo>}
+                {k?.status === 'CONCLUIDO' && <Selo tom="ok">Concluído</Selo>}
               </div>
               {k && <><Progresso valor={k.respondidos} total={k.total} /><p className="muted small num">{k.respondidos} de {k.total} equipamentos conferidos</p></>}
               {!k && <p className="muted small">{c.total} equipamentos para conferir.</p>}
@@ -60,7 +62,7 @@ function Lista() {
       </div>
       <section className="card">
         <h2 className="sep0">Últimos checklists</h2>
-        {!hist ? null : hist.length === 0 ? <div className="vazio"><span className="vazio-ico" aria-hidden="true">☰</span>Nenhum checklist feito ainda.</div> : (
+        {!hist ? null : hist.length === 0 ? <Vazio icone="checklist" titulo="Nenhum checklist feito ainda">Os checklists concluídos aparecem aqui, do mais recente para o mais antigo.</Vazio> : (
           <div className="tabela-wrap"><table>
             <thead><tr><th>Dia</th><th>Turno</th><th>Central</th><th>Feito por</th><th>Situação</th></tr></thead>
             <tbody>{hist.map((h) => (
@@ -109,8 +111,8 @@ function Detalhe({ id }: { id: number }) {
     } finally { setOcupado(false); }
   }
 
-  if (erro) return <div className="erro" role="alert">{erro}</div>;
-  if (!c) return <Carregando />;
+  if (erro && !c) return <Falha mensagem={erro} onTentar={recarregar} />;
+  if (!c) return <Carregando texto="Carregando checklist…" />;
   const faltam = c.total - c.respondidos;
   return (
     <>
@@ -127,7 +129,7 @@ function Detalhe({ id }: { id: number }) {
           {c.respondidos} de {c.total} conferidos{faltam > 0 && c.status === 'EM_ANDAMENTO' ? ` · faltam ${faltam}` : ''} · iniciado por {c.iniciadoPor} às {fmtData(c.iniciadoEm, tz, 'hora')}
           {c.concluidoEm && ` · concluído às ${fmtData(c.concluidoEm, tz, 'hora')}`}
         </div>
-        {aviso && <div className="aviso" role="alert">{aviso}</div>}
+        {aviso && <Aviso tom="atencao" onFechar={() => setAviso('')}>{aviso}</Aviso>}
       </div>
       {c.baias.map((b) => {
         const livres = b.equipamentos.filter((e) => e.resultado === null && !e.ocorrenciaAberta).length;
@@ -161,8 +163,8 @@ function ItemLinha({ e, pode, pendente, salvar }: { e: Item; pode: boolean; pend
     <div className={'item' + (pendente ? ' pendente' : '') + (oc || e.resultado === 'DEFEITO' ? ' com-defeito' : e.resultado === 'OK' ? ' feito-ok' : '')} id={`eq-${e.id}`}>
       <div className="item-topo">
         <span className="item-nome">{e.nome}</span>
-        {oc && <span className={'selo ' + (oc.severidade === 'INOPERANTE' ? 'parado' : 'atencao')}>Defeito aberto há {fmtDur(desde(oc.abertaEm))} · {SEV_ROTULO[oc.severidade]}</span>}
-        {e.resultado === 'NA' && <span className="selo">Não se aplica</span>}
+        {oc && <SeloSeveridade severidade={oc.severidade}>Defeito aberto há {fmtDur(desde(oc.abertaEm))} · {SEV_ROTULO[oc.severidade]}</SeloSeveridade>}
+        {e.resultado === 'NA' && <Selo>Não se aplica</Selo>}
         {pode ? (
           <span className="resp">
             {oc ? (
@@ -179,7 +181,7 @@ function ItemLinha({ e, pode, pendente, salvar }: { e: Item; pode: boolean; pend
             )}
           </span>
         ) : (
-          e.resultado && !oc && <span className={'selo ' + (e.resultado === 'OK' ? 'ok' : e.resultado === 'DEFEITO' ? 'parado' : '')}>{e.resultado === 'OK' ? 'Funcionando' : e.resultado === 'DEFEITO' ? 'Com defeito' : 'Não se aplica'}</span>
+          e.resultado && !oc && <Selo tom={e.resultado === 'OK' ? 'ok' : e.resultado === 'DEFEITO' ? 'parado' : 'neutro'}>{e.resultado === 'OK' ? 'Funcionando' : e.resultado === 'DEFEITO' ? 'Com defeito' : 'Não se aplica'}</Selo>
         )}
       </div>
       {oc && <div className="muted small">“{oc.descricao}” · <a href={`#/ocorrencias/${oc.id}`}>ver ocorrência</a></div>}

@@ -13,7 +13,7 @@ export function BarList({ itens, formato = (v) => String(v), vazio = 'Sem dados 
   formato?: (v: number) => string; vazio?: string;
 }) {
   const [dica, setDica] = useState<Dica | null>(null);
-  if (!itens.length || itens.every((i) => i.valor === 0)) return <p className="vazio">{vazio}</p>;
+  if (!itens.length || itens.every((i) => i.valor === 0)) return <p className="graf-vazio">{vazio}</p>;
   const max = Math.max(...itens.map((i) => i.valor), 1);
   const L = 132, R = 56, W = 460, H = 28, trilho = W - L - R;
   return (
@@ -40,7 +40,7 @@ export function BarList({ itens, formato = (v) => String(v), vazio = 'Sem dados 
 export function SerieDiaria({ dados, tz }: { dados: Array<{ dia: string; abertas: number; resolvidas: number }>; tz?: string }) {
   const [dica, setDica] = useState<Dica | null>(null);
   void tz;
-  if (!dados.length) return <p className="vazio">Sem dados no período.</p>;
+  if (!dados.length) return <p className="graf-vazio">Sem dados no período.</p>;
   const W = 560, H = 230, ml = 30, mr = 8, mt = 10, mb = 26;
   const max = Math.max(4, ...dados.flatMap((d) => [d.abertas, d.resolvidas]));
   const topo = Math.ceil(max / 2) * 2;
@@ -87,7 +87,7 @@ export function SerieDiaria({ dados, tz }: { dados: Array<{ dia: string; abertas
 
 export function Empilhada({ partes }: { partes: Array<{ rotulo: string; valor: number; classe: 'ok' | 'at' | 'pa' }> }) {
   const total = partes.reduce((s, p) => s + p.valor, 0);
-  if (!total) return <p className="vazio">Ainda não há turnos para medir.</p>;
+  if (!total) return <p className="graf-vazio">Ainda não há turnos para medir.</p>;
   const W = 460, H = 22;
   let x = 0;
   return (

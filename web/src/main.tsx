@@ -8,9 +8,10 @@ import '@fontsource/barlow-semi-condensed/600.css';
 import '@fontsource/barlow-semi-condensed/700.css';
 import './styles/tokens.css';
 import './styles/base.css';
+import './styles/components.css';
 import './styles/app.css';
 import { App } from './App';
-import { aplicarTemaSalvo } from './ui';
+import { aplicarTemaSalvo } from './components/Tema';
 
 aplicarTemaSalvo();
 createRoot(document.getElementById('root')!).render(<App />);

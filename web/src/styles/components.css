@@ -1,0 +1,48 @@
+/* ---------- componentes compartilhados (src/components) ---------- */
+
+/* cabeçalho de página */
+.cab { display: flex; justify-content: space-between; gap: var(--e-4); align-items: flex-end; flex-wrap: wrap; margin-bottom: var(--e-6); }
+.cab-txt { min-width: 0; }
+.cab-txt p { margin-top: var(--e-1); max-width: 72ch; }
+.cab-acoes { display: flex; gap: var(--e-2); align-items: center; flex-wrap: wrap; }
+
+/* seção com título */
+.secao { display: grid; gap: var(--e-4); align-content: start; }
+.secao-cab { display: flex; gap: var(--e-3); align-items: flex-start; justify-content: space-between; flex-wrap: wrap; }
+.secao-titulo { display: grid; gap: 2px; min-width: 0; }
+.card .secao-cab h2 { margin: 0; }
+.secao-acoes { display: flex; gap: var(--e-2); align-items: center; flex-wrap: wrap; }
+
+/* estados de tela */
+.estado { display: grid; justify-items: center; text-align: center; gap: var(--e-3); padding: var(--e-10) var(--e-4); color: var(--tinta-2); }
+.estado.carregando { display: flex; justify-content: center; align-items: center; font-weight: 500; padding: var(--e-12) var(--e-4); }
+.estado-txt { display: grid; gap: var(--e-1); max-width: 48ch; }
+.estado-txt b { color: var(--tinta); font-weight: 600; }
+.estado-ico { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--painel-3); color: var(--tinta-2); }
+.estado-ico.ok { background: var(--ok-fundo); color: var(--ok); }
+.estado-ico.parado { background: var(--parado-fundo); color: var(--parado); }
+.estado.falha { border: 1px solid color-mix(in oklch, var(--parado-cor) 35%, var(--linha)); border-radius: var(--raio); background: var(--painel); }
+
+/* avisos em linha */
+.aviso-msg { display: flex; gap: var(--e-3); align-items: flex-start; padding: var(--e-3) var(--e-4); border-radius: var(--raio-p); border: 1px solid transparent; font-size: var(--fs-s); line-height: 1.45; animation: surge var(--dur-2) var(--curva); }
+.aviso-msg > .ico { margin-top: 1px; }
+.aviso-txt { flex: 1; min-width: 0; }
+.aviso-msg.erro { background: var(--parado-fundo); color: var(--parado); border-color: color-mix(in oklch, var(--parado-cor) 30%, transparent); }
+.aviso-msg.atencao { background: var(--atencao-fundo); color: var(--atencao); border-color: color-mix(in oklch, var(--atencao-cor) 40%, transparent); }
+.aviso-msg.sucesso { background: var(--ok-fundo); color: var(--ok); border-color: color-mix(in oklch, var(--ok-cor) 30%, transparent); }
+.aviso-msg.info { background: var(--acao-suave); color: var(--link); border-color: color-mix(in oklch, var(--acao) 25%, transparent); }
+.aviso-fechar { margin: -6px -8px -6px 0; width: 32px; height: 32px; border: 0; border-radius: var(--raio-p); background: transparent; color: inherit; display: grid; place-items: center; cursor: pointer; opacity: 0.8; }
+.aviso-fechar:hover { opacity: 1; background: color-mix(in oklch, currentColor 10%, transparent); }
+
+/* campo de formulário */
+.campo { display: grid; gap: 6px; align-content: start; }
+.campo > label { font-weight: 600; font-size: var(--fs-s); color: var(--tinta); }
+.campo-dica { color: var(--tinta-2); font-size: var(--fs-xs); }
+.campo-erro { color: var(--parado); font-size: var(--fs-xs); font-weight: 600; }
+.campo.com-erro input, .campo.com-erro select, .campo.com-erro textarea { border-color: var(--parado-cor); }
+
+/* selo com ícone */
+.selo .ico { margin-left: -2px; }
+
+/* gráfico sem dados */
+.graf-vazio { padding: var(--e-6) var(--e-2); color: var(--tinta-2); font-size: var(--fs-s); text-align: center; border: 1px dashed var(--linha-forte); border-radius: var(--raio-p); }

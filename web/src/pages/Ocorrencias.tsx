@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
-import { SEV_ROTULO, STATUS_ROTULO, fmtData, fmtDur, desde, get, post, type Severidade, type Status } from '../api';
+import { STATUS_ROTULO, fmtData, fmtDur, desde, get, post, type Severidade, type Status } from '../api';
 import { useDados, useRota, useSessao } from '../ctx';
-import { Carregando } from '../ui';
+import { Aviso } from '../components/Aviso';
+import { Carregando, Falha, Vazio } from '../components/Estado';
+import { CabecalhoPagina } from '../components/Pagina';
+import { SeloSeveridade, SeloStatus } from '../components/Selo';
 
 interface Linha {
   id: number; status: Status; severidade: Severidade; descricao: string; aberta_em: string; resolvida_em: string | null;
@@ -17,7 +20,6 @@ const PROXIMOS: Record<string, Status[]> = {
   CANCELADA: [],
 };
 const ACAO: Record<Status, string> = { ABERTA: 'Reabrir', EM_MANUTENCAO: 'Assumir / em manutenção', AGUARDANDO_PECA: 'Aguardando peça', RESOLVIDA: 'Marcar como resolvida', CANCELADA: 'Cancelar (lançada por engano)' };
-const tomSelo = (s: Status) => (s === 'RESOLVIDA' ? 'ok' : s === 'CANCELADA' ? '' : s === 'ABERTA' ? 'parado' : 'atencao');
 
 export function Ocorrencias() {
   const rota = useRota();
@@ -32,7 +34,7 @@ export function Ocorrencias() {
   const { tz } = useSessao();
   return (
     <>
-      <div className="cab"><div><h1>Ocorrências</h1><p className="muted">Cada equipamento com defeito tem uma ocorrência, que segue até ser resolvida.</p></div></div>
+      <CabecalhoPagina titulo="Ocorrências">Cada equipamento com defeito tem uma ocorrência, que segue até ser resolvida.</CabecalhoPagina>
       <div className="filtros">
         <label className="campo">Mostrar
           <select value={situacao} onChange={(e) => setSituacao(e.target.value)}>
@@ -43,22 +45,21 @@ export function Ocorrencias() {
             <option value="">Todas</option>{centrais?.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
           </select></label>
       </div>
-      {erro && <div className="erro" role="alert">{erro}</div>}
       <div className="duas">
         <section className="card">
-          {!lista ? <Carregando /> : lista.length === 0 ? <div className="vazio"><span className="vazio-ico ok" aria-hidden="true">✓</span>Nenhuma ocorrência {situacao === 'abertas' ? 'aberta' : 'no período'}.</div> : (
+          {erro && !lista ? <Falha mensagem={erro} onTentar={recarregar} /> : !lista ? <Carregando texto="Carregando ocorrências…" /> : lista.length === 0 ? <Vazio tom="ok" icone="certo" titulo={`Nenhuma ocorrência ${situacao === 'abertas' ? 'aberta' : 'no período'}`} /> : (
             <div className="tabela-wrap"><table>
               <thead><tr><th>Equipamento</th><th>Local</th><th>Situação</th><th>Aberta</th></tr></thead>
               <tbody>{lista.map((o) => (
                 <tr key={o.id} className={'clic' + (o.id === selecionada ? ' sel' : '')} onClick={() => { location.hash = `#/ocorrencias/${o.id}`; }}>
                   <td><a href={`#/ocorrencias/${o.id}`}>{o.equipamento}</a><div className="small muted">{o.descricao}</div></td>
                   <td>{o.central}<div className="small muted">Baia {o.baia}</div></td>
-                  <td><span className={'selo ' + tomSelo(o.status)}>{STATUS_ROTULO[o.status]}</span>{o.severidade === 'INOPERANTE' && o.status !== 'RESOLVIDA' && o.status !== 'CANCELADA' && <div className="small"><span className="selo parado">Parado</span></div>}</td>
+                  <td><SeloStatus status={o.status} />{o.severidade === 'INOPERANTE' && o.status !== 'RESOLVIDA' && o.status !== 'CANCELADA' && <div className="small"><SeloSeveridade severidade="INOPERANTE" /></div>}</td>
                   <td className="num">{fmtData(o.aberta_em, tz)}</td>
                 </tr>))}</tbody></table></div>
           )}
         </section>
-        {selecionada ? <Detalhe id={selecionada} aoMudar={recarregar} /> : <section className="card vazio vazio-lateral"><span className="vazio-ico" aria-hidden="true">☰</span>Escolha uma ocorrência para ver o histórico e atualizar o andamento.</section>}
+        {selecionada ? <Detalhe id={selecionada} aoMudar={recarregar} /> : <section className="card vazio-lateral"><Vazio icone="ocorrencias" titulo="Nenhuma ocorrência selecionada">Escolha uma ocorrência na lista para ver o histórico e atualizar o andamento.</Vazio></section>}
       </div>
     </>
   );
@@ -78,12 +79,12 @@ function Detalhe({ id, aoMudar }: { id: number; aoMudar: () => void }) {
     try { await fn(); if (limpar) setNota(''); recarregar(); aoMudar(); }
     catch (e) { setMsg((e as Error).message); } finally { setOcupado(false); }
   }
-  if (erro) return <section className="card"><div className="erro" role="alert">{erro}</div></section>;
-  if (!o) return <section className="card"><Carregando /></section>;
+  if (erro && !o) return <section className="card"><Falha mensagem={erro} onTentar={recarregar} /></section>;
+  if (!o) return <section className="card"><Carregando texto="Carregando ocorrência…" /></section>;
   const aberta = o.status !== 'RESOLVIDA' && o.status !== 'CANCELADA';
   return (
     <section className="card detalhe-oc" aria-live="polite">
-      <div className="linha"><h2>{o.equipamento}</h2><span className={'selo ' + tomSelo(o.status)}>{STATUS_ROTULO[o.status]}</span><span className={'selo ' + (o.severidade === 'INOPERANTE' ? 'parado' : 'atencao')}>{SEV_ROTULO[o.severidade]}</span></div>
+      <div className="linha"><h2>{o.equipamento}</h2><SeloStatus status={o.status} /><SeloSeveridade severidade={o.severidade} /></div>
       <p className="muted small">{o.central} · Baia {o.baia} · aberta por {o.aberta_por} em {fmtData(o.aberta_em, tz)}{aberta ? ` (há ${fmtDur(desde(o.aberta_em))})` : o.resolvida_em ? ` · encerrada em ${fmtData(o.resolvida_em, tz)}` : ''}</p>
       <ol className="linha-tempo">
         {o.eventos.map((ev) => (
@@ -92,7 +93,7 @@ function Detalhe({ id, aoMudar }: { id: number; aoMudar: () => void }) {
             <div><b>{ev.tipo === 'NOTA' ? 'Anotação' : ev.tipo === 'CONFIRMADA' ? 'Defeito continua' : ev.para_status ? STATUS_ROTULO[ev.para_status] : ev.tipo}</b>{ev.nota ? ` — ${ev.nota}` : ''}</div>
           </li>))}
       </ol>
-      {msg && <div className="erro" role="alert">{msg}</div>}
+      {msg && <Aviso tom="erro" onFechar={() => setMsg('')}>{msg}</Aviso>}
       <label className="campo sep">Anotação {podeStatus ? '(vai junto com a mudança de situação)' : ''}
         <textarea value={nota} maxLength={500} onChange={(e) => setNota(e.target.value)} placeholder="Ex.: troquei o cabo, aguardando teste" /></label>
       <div className="linha sep0">
