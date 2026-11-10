@@ -1,11 +1,6 @@
-/* ---------- componentes ---------- */
+/* ---------- controles e primitivas: superfície, botão, campo, selo, segmento, tabela ---------- */
 .card { background: var(--painel); border: 1px solid var(--linha); border-radius: var(--raio); padding: var(--e-5) var(--e-6); }
 .card h2 { margin-bottom: var(--e-4); font-size: var(--fs-l); }
-.card .linha > h2 { margin-bottom: 0; }
-.card h2.sep { margin-top: var(--e-8); }
-.grade { display: grid; gap: var(--e-4); }
-.grade + .card, .grade + section.card { margin-top: var(--e-4); }
-.g2 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr)); }
 .btn {
   min-height: var(--alvo); padding: var(--e-2) var(--e-4); border-radius: var(--raio-p); border: 1px solid var(--linha-forte); background: var(--painel);
   font-weight: 600; font-size: var(--fs-s); line-height: 1.2; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: var(--e-2);
@@ -30,8 +25,6 @@ select { background-color: var(--painel); color: var(--tinta); }
 input:hover, select:hover, textarea:hover { border-color: var(--tinta-3); }
 input:focus-visible, select:focus-visible, textarea:focus-visible { outline: none; border-color: var(--foco); box-shadow: 0 0 0 1px var(--foco), 0 0 0 4px color-mix(in oklch, var(--foco) 22%, transparent); }
 textarea { min-height: 84px; resize: vertical; line-height: 1.45; }
-.erro { background: var(--parado-fundo); color: var(--parado); border-radius: var(--raio-p); padding: var(--e-3) var(--e-4); font-weight: 500; }
-.aviso { background: var(--atencao-fundo); color: var(--atencao); border-radius: var(--raio-p); padding: var(--e-3) var(--e-4); }
 .vazio-lateral { padding: var(--e-16) var(--e-6); border-style: dashed; background: transparent; }
 .spinner { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--trilho); border-top-color: var(--acao); animation: gira 700ms linear infinite; }
 .voltar { display: inline-flex; align-items: center; gap: 2px; margin-bottom: var(--e-3); font-weight: 500; font-size: var(--fs-s); color: var(--link); }
@@ -59,17 +52,9 @@ th { color: var(--tinta-2); font-weight: 600; font-size: var(--fs-xs); white-spa
 tbody tr:last-child td { border-bottom: 0; }
 tr.sel td { background: var(--acao-suave); }
 tbody tr.clic { cursor: pointer; } tbody tr.clic:hover td { background: var(--painel-2); }
-tr.inativo td { opacity: 0.55; } tr.inativo td:last-child { opacity: 1; }
 .tabela-wrap td:nth-child(2) { white-space: nowrap; }
 td.num { white-space: nowrap; }
 
-
-/* ---------- formulários em linha e espaçamentos ---------- */
-.filtros { display: flex; gap: var(--e-3); flex-wrap: wrap; align-items: end; margin-bottom: var(--e-4); }
-.filtros label.campo { min-width: 180px; }
-.sep { margin-top: var(--e-8); } .sep0 { margin-bottom: var(--e-4); }
-.card .baia-bloco:last-of-type { margin-bottom: var(--e-4); }
-form.grade { align-content: start; } form.grade .btn.prim { justify-self: start; }
 
 /* ---------- responsivo ---------- */
 @media (max-width: 520px) {

@@ -8,13 +8,14 @@ import '@fontsource/barlow-semi-condensed/600.css';
 import '@fontsource/barlow-semi-condensed/700.css';
 import './styles/tokens.css';
 import './styles/base.css';
+import './styles/controles.css';
 import './styles/components.css';
 import './styles/shell.css';
-import './styles/app.css';
 import './styles/charts.css';
 import './styles/painel.css';
 import './styles/checklist.css';
 import './styles/ocorrencias.css';
+import './styles/cadastro.css';
 import { App } from './App';
 import { aplicarTemaSalvo } from './components/Tema';
 
