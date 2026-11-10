@@ -26,7 +26,8 @@
 .turno-topo { display: flex; justify-content: space-between; align-items: center; font-size: var(--fs-xs); color: var(--lateral-mudo); }
 .aovivo { display: inline-flex; align-items: center; gap: 6px; color: var(--sinal); }
 .aovivo i { width: 7px; height: 7px; border-radius: 50%; background: var(--sinal); animation: pulso 2.4s ease-in-out infinite; }
-.turno-nome { display: flex; align-items: center; gap: var(--e-2); font: 600 var(--fs-xl)/1.15 var(--tit); color: var(--lateral-tinta); font-variant-numeric: tabular-nums; }
+.turno-nome { display: flex; align-items: center; flex-wrap: wrap; gap: 2px var(--e-2); font: 600 var(--fs-l)/1.2 var(--tit); color: var(--lateral-tinta); font-variant-numeric: tabular-nums; }
+.turno-faixa { white-space: nowrap; }
 .turno-nome .ico { color: var(--sinal); }
 .turno-barra { height: 4px; border-radius: var(--raio-pilula); background: var(--lateral-linha); overflow: hidden; }
 .turno-barra i { display: block; height: 100%; border-radius: var(--raio-pilula); background: var(--sinal); transition: width 600ms var(--curva); }
