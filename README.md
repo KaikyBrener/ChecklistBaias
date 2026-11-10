@@ -76,7 +76,7 @@ Organização do front (`web/src`):
 
 Sem estilo inline no HTML (a CSP não permite): larguras dinâmicas são aplicadas pelo React via CSSOM, que a política aceita.
 
-As decisões de interface seguiram, como referência e sem copiar código, as orientações de [frontend-design](https://github.com/anthropics/skills/tree/main/skills/frontend-design) (Anthropic, Apache-2.0), [Impeccable](https://github.com/pbakaus/impeccable) (Apache-2.0), [UI/UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) (MIT) e das skills da Vercel [web-design-guidelines](https://github.com/vercel-labs/agent-skills/tree/main/skills/web-design-guidelines), [react-best-practices](https://github.com/vercel-labs/agent-skills/tree/main/skills/react-best-practices) e [composition-patterns](https://github.com/vercel-labs/agent-skills/tree/main/skills/composition-patterns) (MIT).
+As decisões de interface seguiram, como referência e sem copiar código, as orientações de [Impeccable](https://github.com/pbakaus/impeccable) (Apache-2.0), [UI/UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) (MIT) e das skills da Vercel [web-design-guidelines](https://github.com/vercel-labs/agent-skills/tree/main/skills/web-design-guidelines), [react-best-practices](https://github.com/vercel-labs/agent-skills/tree/main/skills/react-best-practices) e [composition-patterns](https://github.com/vercel-labs/agent-skills/tree/main/skills/composition-patterns) (MIT).
 
 Stack: Node 22, Express, SQLite (better-sqlite3), zod, React + Vite + TypeScript. Gráficos em SVG puro (sem biblioteca), porque a política de segurança do servidor não permite estilo inline.
 
