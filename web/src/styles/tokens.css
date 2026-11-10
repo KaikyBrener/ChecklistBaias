@@ -1,0 +1,130 @@
+/* ============ Design system — Checklist de baias ============
+   Identidade do "Template visual" (Modelo-front): tinta azul-marinho, sinal ciano, ação petróleo,
+   fontes Barlow / Barlow Semi Condensed. Cores em OKLCH, com neutros levemente puxados para o azul
+   da marca. A cor fica reservada para estado (ok, atenção, parado) e ação; o resto é neutro.
+   Tema claro é o padrão; o escuro tem elevação própria (não é o claro invertido). */
+
+:root {
+  /* ---- superfícies (do fundo para cima) ---- */
+  --bg: oklch(96.4% 0.006 255);
+  --painel: oklch(100% 0 0);
+  --painel-2: oklch(97.6% 0.005 255);
+  --painel-3: oklch(94.6% 0.008 255);
+  --linha: oklch(91.2% 0.01 255);
+  --linha-forte: oklch(83.5% 0.016 255);
+
+  /* ---- texto ---- */
+  --tinta: oklch(21.5% 0.04 258);
+  --tinta-2: oklch(45.5% 0.032 258);
+  --tinta-3: oklch(55% 0.026 258);
+
+  /* ---- marca e ação ---- */
+  --sinal: oklch(75.5% 0.13 205);
+  --acao: oklch(48.5% 0.09 218);
+  --acao-hover: oklch(42.5% 0.085 218);
+  --acao-tinta: oklch(100% 0 0);
+  --acao-suave: oklch(94.6% 0.03 212);
+  --link: oklch(46% 0.09 218);
+  --foco: oklch(52% 0.11 218);
+
+  /* ---- estados (texto / fundo / preenchimento de marca gráfica) ---- */
+  --ok: oklch(47% 0.11 156);
+  --ok-fundo: oklch(94.8% 0.04 156);
+  --ok-cor: oklch(62% 0.14 156);
+  --atencao: oklch(48.5% 0.1 68);
+  --atencao-fundo: oklch(95.6% 0.055 88);
+  --atencao-cor: oklch(78% 0.15 78);
+  --parado: oklch(49.5% 0.18 27);
+  --parado-fundo: oklch(94.8% 0.035 25);
+  --parado-cor: oklch(57% 0.2 27);
+
+  /* ---- dados ---- */
+  --serie-a: oklch(54% 0.15 258);
+  --serie-b: oklch(62% 0.15 52);
+  --barra: var(--serie-a);
+  --trilho: oklch(92.5% 0.01 255);
+
+  /* ---- menu lateral (escuro nos dois temas, como no template) ---- */
+  --lateral: oklch(21.5% 0.04 258);
+  --lateral-2: oklch(28.5% 0.05 258);
+  --lateral-3: oklch(25% 0.045 258);
+  --lateral-linha: oklch(32% 0.05 258);
+  --lateral-tinta: oklch(94% 0.012 255);
+  --lateral-mudo: oklch(72% 0.03 255);
+
+  /* ---- tipografia: uma superfamília, escala fixa ---- */
+  --fonte: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --tit: "Barlow Semi Condensed", "Barlow", system-ui, sans-serif;
+  --fs-xs: 0.8125rem;  /* 13 */
+  --fs-s: 0.875rem;    /* 14 */
+  --fs-m: 1rem;        /* 16 — corpo */
+  --fs-l: 1.125rem;    /* 18 */
+  --fs-xl: 1.375rem;   /* 22 — títulos de seção */
+  --fs-2xl: 1.75rem;   /* 28 — título da página */
+  --fs-3xl: 2.5rem;    /* 40 — números de indicador */
+
+  /* ---- espaçamento: base 4 px ---- */
+  --e-1: 4px; --e-2: 8px; --e-3: 12px; --e-4: 16px; --e-5: 20px;
+  --e-6: 24px; --e-8: 32px; --e-10: 40px; --e-12: 48px; --e-16: 64px;
+
+  /* ---- forma ---- */
+  --raio-s: 4px;   /* marcas pequenas */
+  --raio-p: 6px;   /* controles */
+  --raio: 8px;     /* superfícies */
+  --raio-pilula: 999px;
+  --alvo: 44px;    /* altura mínima de alvo de toque */
+  --sombra-flutuante: 0 8px 24px oklch(21.5% 0.04 258 / 0.14), 0 2px 6px oklch(21.5% 0.04 258 / 0.08);
+
+  /* ---- movimento: só para responder a ações ---- */
+  --dur-1: 120ms;  /* retorno imediato (hover, pressionar) */
+  --dur-2: 200ms;  /* mudança de estado */
+  --dur-3: 320ms;  /* painel / revelação */
+  --curva: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ---- camadas ---- */
+  --z-fixo: 10; --z-barra: 20; --z-dica: 40;
+
+  --largura-max: 1280px;
+  --lateral-largura: 248px;
+}
+
+:root[data-tema="escuro"] {
+  --bg: oklch(15.5% 0.024 258);
+  --painel: oklch(19.5% 0.028 258);
+  --painel-2: oklch(22.5% 0.03 258);
+  --painel-3: oklch(26% 0.034 258);
+  --linha: oklch(28.5% 0.034 258);
+  --linha-forte: oklch(37% 0.04 258);
+
+  --tinta: oklch(94.5% 0.01 255);
+  --tinta-2: oklch(77% 0.028 255);
+  --tinta-3: oklch(66% 0.028 255);
+
+  --acao: oklch(78% 0.12 205);
+  --acao-hover: oklch(84% 0.1 205);
+  --acao-tinta: oklch(19% 0.04 225);
+  --acao-suave: oklch(30% 0.055 215);
+  --link: oklch(82% 0.1 205);
+  --foco: oklch(82% 0.11 205);
+
+  --ok: oklch(80% 0.13 156);
+  --ok-fundo: oklch(29% 0.055 158);
+  --ok-cor: oklch(70% 0.14 156);
+  --atencao: oklch(85% 0.12 86);
+  --atencao-fundo: oklch(30% 0.055 78);
+  --atencao-cor: oklch(80% 0.15 80);
+  --parado: oklch(78% 0.12 24);
+  --parado-fundo: oklch(30% 0.075 24);
+  --parado-cor: oklch(66% 0.19 26);
+
+  --serie-a: oklch(70% 0.13 258);
+  --serie-b: oklch(75% 0.12 55);
+  --trilho: oklch(27% 0.034 258);
+
+  --lateral: oklch(12.5% 0.02 258);
+  --lateral-2: oklch(22% 0.035 258);
+  --lateral-3: oklch(17.5% 0.03 258);
+  --lateral-linha: oklch(24% 0.034 258);
+
+  --sombra-flutuante: 0 8px 24px oklch(0% 0 0 / 0.5), 0 2px 6px oklch(0% 0 0 / 0.35);
+}

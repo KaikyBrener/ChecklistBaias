@@ -6,7 +6,9 @@ import '@fontsource/barlow/700.css';
 import '@fontsource/barlow-semi-condensed/500.css';
 import '@fontsource/barlow-semi-condensed/600.css';
 import '@fontsource/barlow-semi-condensed/700.css';
-import './styles.css';
+import './styles/tokens.css';
+import './styles/base.css';
+import './styles/app.css';
 import { App } from './App';
 import { aplicarTemaSalvo } from './ui';
 
