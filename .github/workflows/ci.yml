@@ -11,11 +11,17 @@ permissions:
 jobs:
   testes:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 22 = versão de desenvolvimento; 26 = a que roda em produção (imagem Docker).
+        node: [22, 26]
+    name: testes (Node ${{ matrix.node }})
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version: ${{ matrix.node }}
           cache: npm
           cache-dependency-path: |
             server/package-lock.json
@@ -36,3 +42,36 @@ jobs:
         run: |
           (cd server && npm audit --omit=dev --audit-level=high)
           (cd web && npm audit --omit=dev --audit-level=high)
+
+  # A imagem que vai para o servidor: constrói, sobe e confere o que a instalação precisa.
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Constrói a imagem
+        run: docker compose build
+      - name: Sobe e espera ficar saudável
+        run: |
+          docker compose up -d
+          estado=starting
+          for i in $(seq 1 45); do
+            estado=$(docker inspect --format '{{.State.Health.Status}}' "$(docker compose ps -q checklist)")
+            [ "$estado" = healthy ] && break
+            sleep 2
+          done
+          docker compose logs checklist
+          [ "$estado" = healthy ]
+      - name: Primeiro acesso, API, front-end e backup
+        run: |
+          docker compose logs checklist | grep -q 'Senha (aparece só desta vez)'
+          curl -fsS http://localhost:3000/api/publico | grep -q '"demo":false'
+          curl -fsS http://localhost:3000/ | grep -q 'id="root"'
+          mkdir -p /tmp/bk && deploy/backup.sh /tmp/bk
+          ls -l /tmp/bk/checklist-*.db
+      - name: Os dados sobrevivem a recriar o container
+        run: |
+          docker compose down
+          docker compose up -d --wait
+          ! docker compose logs checklist | grep -q 'Primeiro acesso criado'
+      - name: Compose com HTTPS é válido
+        run: docker compose -f docker-compose.https.yml config -q

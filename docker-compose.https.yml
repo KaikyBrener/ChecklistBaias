@@ -1,0 +1,35 @@
+# Alternativa ao docker-compose.yml: o mesmo sistema atrás de um proxy com HTTPS (Caddy).
+# Uso:  docker compose -f docker-compose.https.yml up -d --build
+# A porta 3000 do sistema NÃO é publicada; o único acesso é pelo proxy (80 redireciona para 443).
+services:
+  checklist:
+    build: .
+    image: checklist-baias
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      TZ_OPERACAO: ${TZ_OPERACAO:-America/Sao_Paulo}
+      COOKIE_SECURE: "1"   # o cookie de sessão só trafega por HTTPS
+      TRUST_PROXY: "1"     # o IP do limite de login vem do proxy
+    volumes:
+      - dados:/data   # banco, segredo da sessão e backups ficam aqui
+  proxy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - checklist
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMINIO: ${DOMINIO:-checklist.local}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_dados:/data       # certificados (inclui a raiz do "tls internal")
+      - caddy_config:/config
+volumes:
+  dados:
+  caddy_dados:
+  caddy_config:
