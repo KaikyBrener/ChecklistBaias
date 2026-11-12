@@ -1,0 +1,12 @@
+# Proxy reverso com HTTPS para o Checklist de baias (usado por docker-compose.https.yml).
+#
+# DOMINIO é o nome (ou IP) que as pessoas digitam no navegador, definido no .env.
+# "tls internal" faz o Caddy emitir um certificado próprio, sem depender da internet:
+# serve para rede interna. Os navegadores só confiam nele depois que o certificado raiz do
+# Caddy for instalado nas máquinas (veja docs/IMPLANTACAO.md). Se a empresa tiver certificado
+# próprio, troque a linha por:  tls /certs/checklist.crt /certs/checklist.key
+{$DOMINIO:checklist.local} {
+	tls internal
+	encode gzip
+	reverse_proxy checklist:3000
+}

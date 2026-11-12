@@ -36,9 +36,13 @@
 /* quem está usando */
 .quem { display: flex; gap: var(--e-2); align-items: center; padding: var(--e-1) var(--e-1) 0; border-top: 1px solid var(--lateral-linha); padding-top: var(--e-4); }
 .avatar { width: 36px; height: 36px; border-radius: 50%; display: inline-grid; place-items: center; font-weight: 600; color: var(--lateral-tinta); background: var(--lateral-2); flex: none; border: 1px solid var(--lateral-linha); }
+.quem-conta { display: flex; align-items: center; gap: var(--e-2); min-width: 0; flex: 1; padding: 2px; margin: -2px; border: 0; border-radius: var(--raio-p); background: transparent; color: inherit; text-align: left; }
+button.quem-conta { cursor: pointer; transition: background-color var(--dur-1); }
+button.quem-conta:hover { background: var(--lateral-2); }
+button.quem-conta:focus-visible { outline-color: var(--sinal); }
 .quem-nome { display: grid; min-width: 0; flex: 1; line-height: 1.25; }
 .quem-nome b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-s); font-weight: 600; }
-.quem-nome small { color: var(--lateral-mudo); font-size: var(--fs-xs); }
+.quem-nome small { color: var(--lateral-mudo); font-size: var(--fs-xs); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .icone-btn { width: 40px; height: 40px; border-radius: var(--raio-p); border: 0; background: transparent; color: var(--lateral-mudo); cursor: pointer; display: inline-grid; place-items: center; flex: none; transition: background-color var(--dur-1), color var(--dur-1); }
 .icone-btn:hover { background: var(--lateral-2); color: var(--lateral-tinta); }
 
@@ -64,7 +68,9 @@ main:focus { outline: none; }
   .turno-nome { font-size: var(--fs-s); gap: 6px; }
   .turno-nome .ico { width: 16px; height: 16px; }
   .quem { padding: 0; border: 0; gap: 0; }
-  .quem-nome, .avatar { display: none; }
+  .quem-nome, span.quem-conta { display: none; }
+  .quem-conta { flex: none; margin: 0 var(--e-1) 0 0; border-radius: 50%; }
+  .quem-conta .avatar { width: 32px; height: 32px; }
 
   .nav {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: var(--z-barra); display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 0;

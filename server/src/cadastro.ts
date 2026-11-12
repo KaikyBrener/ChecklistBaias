@@ -1,6 +1,6 @@
 import type { Db } from './db.js';
 import { ErroDominio } from './errors.js';
-import { hashSenha, type Papel } from './auth.js';
+import { confereSenha, encerrarSessoes, hashSenha, type Papel } from './auth.js';
 import { iso } from './time.js';
 
 export const EQUIPAMENTOS_PADRAO: Array<{ tipo: string; nome: string }> = [
@@ -148,7 +148,16 @@ export function atualizarEquipamento(db: Db, id: number, p: { nome?: string; ati
   if (p.ativo === false && temAberta(db, 'e.id', id)) {
     throw new ErroDominio(409, 'Este equipamento tem ocorrência em aberto. Resolva ou cancele antes de desativá-lo.');
   }
-  if (p.nome !== undefined) db.prepare('UPDATE equipamentos SET nome = ? WHERE id = ?').run(p.nome.trim(), id);
+  if (p.nome !== undefined) {
+    const n = p.nome.trim();
+    if (n.length < 2) throw new ErroDominio(400, 'Informe o nome do equipamento.');
+    try {
+      db.prepare('UPDATE equipamentos SET nome = ? WHERE id = ?').run(n, id);
+    } catch (e) {
+      if (String((e as Error).message).includes('UNIQUE')) throw new ErroDominio(409, 'Esta baia já tem um equipamento com esse nome.');
+      throw e;
+    }
+  }
   if (p.ativo !== undefined) db.prepare('UPDATE equipamentos SET ativo = ? WHERE id = ?').run(p.ativo ? 1 : 0, id);
 }
 
@@ -190,9 +199,20 @@ export function atualizarUsuario(db: Db, id: number, p: { nome?: string; papel?:
   }
   if (p.nome !== undefined) db.prepare('UPDATE usuarios SET nome = ? WHERE id = ?').run(p.nome.trim(), id);
   if (p.papel !== undefined) db.prepare('UPDATE usuarios SET papel = ? WHERE id = ?').run(p.papel, id);
+  if (p.senha !== undefined) validarSenha(p.senha);
   if (p.ativo !== undefined) db.prepare('UPDATE usuarios SET ativo = ? WHERE id = ?').run(p.ativo ? 1 : 0, id);
-  if (p.senha !== undefined) {
-    validarSenha(p.senha);
-    db.prepare('UPDATE usuarios SET senha_hash = ? WHERE id = ?').run(hashSenha(p.senha), id);
-  }
+  if (p.senha !== undefined) db.prepare('UPDATE usuarios SET senha_hash = ? WHERE id = ?').run(hashSenha(p.senha), id);
+  // Senha redefinida ou conta desativada: quem estava logado com a credencial antiga cai na hora.
+  if (p.senha !== undefined || p.ativo === false) encerrarSessoes(db, id);
+}
+
+/** O próprio usuário troca a senha: confere a atual, grava a nova e derruba as outras sessões. Devolve a nova versão. */
+export function trocarPropriaSenha(db: Db, id: number, atual: string, nova: string): number {
+  const u = db.prepare('SELECT senha_hash FROM usuarios WHERE id = ? AND ativo = 1').get(id) as { senha_hash: string } | undefined;
+  if (!u) throw new ErroDominio(404, 'Usuário não encontrado.');
+  if (!confereSenha(atual, u.senha_hash)) throw new ErroDominio(400, 'A senha atual não confere.');
+  validarSenha(nova);
+  if (nova === atual) throw new ErroDominio(400, 'A nova senha precisa ser diferente da atual.');
+  db.prepare('UPDATE usuarios SET senha_hash = ? WHERE id = ?').run(hashSenha(nova), id);
+  return encerrarSessoes(db, id);
 }

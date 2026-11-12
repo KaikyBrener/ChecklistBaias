@@ -3,7 +3,7 @@
 ## O que o sistema já faz
 
 - Senhas guardadas com **scrypt** (sal aleatório); a comparação usa tempo constante e há um hash falso para igualar o tempo quando o usuário não existe.
-- Sessão em cookie `HttpOnly` + `SameSite=Strict` (JWT assinado, 12 h). A conta é conferida no banco a **cada requisição**, então desativar um usuário vale na hora.
+- Sessão em cookie `HttpOnly` + `SameSite=Strict` (JWT assinado, 12 h). A conta e a versão da sessão são conferidas no banco a **cada requisição**: desativar um usuário, redefinir a senha dele, trocar a própria senha ou sair invalida os tokens antigos na hora.
 - Proteção contra CSRF: toda escrita exige o cabeçalho `X-Requested-With: checklist-baias`.
 - Limite de tentativas de login por IP + usuário (em memória).
 - Cabeçalhos: CSP restritiva (`default-src 'self'`), `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`; respostas da API com `Cache-Control: no-store`.
@@ -14,17 +14,18 @@
 ## Antes de colocar em produção
 
 - [ ] Rodar com `NODE_ENV=production` (a imagem Docker já faz isso). Assim a senha padrão `admin` **não** é criada e o primeiro admin recebe uma senha aleatória (ou a de `ADMIN_SENHA`). Troque-a no primeiro acesso.
-- [ ] Servir por **HTTPS** (proxy reverso) e definir `COOKIE_SECURE=1` e `TRUST_PROXY=1`. Sem HTTPS o cookie de sessão trafega em texto puro.
+- [ ] Servir por **HTTPS**: `docker-compose.https.yml` já traz o proxy (Caddy) e liga `COOKIE_SECURE=1` e `TRUST_PROXY=1`. Sem HTTPS o cookie de sessão trafega em texto puro.
 - [ ] Manter o sistema na rede interna/VPN; não expor a porta 3000 diretamente na internet.
 - [ ] Definir `JWT_SECRET` (32+ caracteres) ou proteger o volume `/data`, onde fica o arquivo `segredo-sessao`.
+- [ ] Cada usuário troca a senha inicial no primeiro acesso (clicando no próprio nome).
 - [ ] Nunca usar `DEMO=1` com dados reais (a tela pública mostra a senha de demonstração).
-- [ ] Agendar o backup (`node dist/backup.js`) e copiar para fora do servidor; proteger os arquivos de backup (contêm todos os dados e os hashes de senha).
+- [ ] Agendar o backup (`deploy/backup.sh /destino` no cron) com destino fora do servidor; proteger os arquivos de backup (contêm todos os dados e os hashes de senha).
 - [ ] Manter as dependências atualizadas (o repositório tem Dependabot e `npm audit` no CI).
 
 ## Limitações conhecidas
 
-- O encerramento de sessão (sair) apaga o cookie no navegador, mas o token continua válido até expirar (12 h); desativar o usuário o invalida de imediato.
-- Redefinir a senha de um usuário não derruba sessões já abertas dele (desative e reative, ou aguarde expirar).
+- Sair encerra todas as sessões do usuário (em todos os aparelhos), porque a invalidação é por conta e não por aparelho.
+- A troca da própria senha tem limite de tentativas erradas da senha atual, também em memória.
 - O limite de tentativas de login fica em memória: reiniciar o servidor zera a contagem, e vale por processo.
 - Não há autenticação em dois fatores nem recuperação de senha por e-mail.
 
