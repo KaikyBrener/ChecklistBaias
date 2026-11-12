@@ -390,3 +390,82 @@ test('equipamento de outra central não entra no checklist', async () => {
     assert.equal(r.status, 400);
   } finally { await amb.fechar(); }
 });
+
+test('sessão: sair, redefinir a senha e desativar a conta derrubam o token antigo no servidor', async () => {
+  const amb = await criarAmbiente();
+  try {
+    const admin = await amb.cliente('admin');
+    const coordId = (await admin.get('/api/usuarios')).corpo.find((u: any) => u.login === 'coord').id;
+
+    // sair: o cookie guardado (roubado, por exemplo) deixa de valer
+    const c = await amb.cliente('coord');
+    const roubado = c.cookie;
+    await c.post('/api/auth/logout');
+    c.cookie = roubado;
+    assert.equal((await c.get('/api/auth/me')).status, 401);
+
+    // o administrador redefine a senha: a sessão aberta cai, a senha antiga não entra mais
+    await c.login('coord');
+    assert.equal((await admin.patch(`/api/usuarios/${coordId}`, { senha: 'outra-senha-456' })).status, 200);
+    assert.equal((await c.get('/api/auth/me')).status, 401);
+    assert.equal((await c.post('/api/auth/login', { login: 'coord', senha: 'senha-forte-123' })).status, 401);
+    await c.login('coord', 'outra-senha-456');
+
+    // senha fraca é recusada sem mexer em mais nada (a sessão continua)
+    assert.equal((await admin.patch(`/api/usuarios/${coordId}`, { senha: '123', ativo: false })).status, 400);
+    assert.equal((await c.get('/api/auth/me')).status, 200);
+
+    // desativar e reativar não ressuscita a sessão antiga
+    await admin.patch(`/api/usuarios/${coordId}`, { ativo: false });
+    await admin.patch(`/api/usuarios/${coordId}`, { ativo: true });
+    assert.equal((await c.get('/api/auth/me')).status, 401);
+  } finally { await amb.fechar(); }
+});
+
+test('cada usuário troca a própria senha: exige a atual, mantém esta sessão e derruba as outras', async () => {
+  const amb = await criarAmbiente();
+  try {
+    const aqui = await amb.cliente('coord');
+    const outroAparelho = await amb.cliente('coord');
+    assert.equal((await (await amb.cliente()).post('/api/auth/senha', { atual: 'x', nova: 'nova-senha-789' })).status, 401);
+    assert.equal((await aqui.post('/api/auth/senha', { atual: 'errada', nova: 'nova-senha-789' })).status, 400);
+    assert.equal((await aqui.post('/api/auth/senha', { atual: 'senha-forte-123', nova: 'curta' })).status, 400);
+    assert.equal((await aqui.post('/api/auth/senha', { atual: 'senha-forte-123', nova: 'senha-forte-123' })).status, 400);
+    assert.equal((await aqui.post('/api/auth/senha', { atual: 'senha-forte-123', nova: 'nova-senha-789' })).status, 200);
+    assert.equal((await aqui.get('/api/auth/me')).status, 200);
+    assert.equal((await outroAparelho.get('/api/auth/me')).status, 401);
+    const novo = await amb.cliente();
+    assert.equal((await novo.post('/api/auth/login', { login: 'coord', senha: 'senha-forte-123' })).status, 401);
+    await novo.login('coord', 'nova-senha-789');
+  } finally { await amb.fechar(); }
+});
+
+test('cadastro de equipamento: adicionar, renomear, nome repetido na baia e reativar', async () => {
+  const amb = await criarAmbiente();
+  try {
+    const { centralId, detalhe, admin } = await montarCentral(amb, 'Central 1', 1);
+    const baiaId = detalhe.baias[0].id;
+    const tipos = (await admin.get('/api/tipos')).corpo as Array<{ id: number; nome: string }>;
+    const monitor = tipos.find((t) => t.nome === 'Monitor')!.id;
+
+    const novo = await admin.post(`/api/baias/${baiaId}/equipamentos`, { tipo_id: monitor, nome: 'Monitor 3' });
+    assert.equal(novo.status, 201);
+    assert.equal((await admin.post(`/api/baias/${baiaId}/equipamentos`, { tipo_id: monitor, nome: 'Monitor 3' })).status, 409);
+    assert.equal((await admin.patch(`/api/equipamentos/${novo.corpo.id}`, { nome: 'Monitor 1' })).status, 409);
+    assert.equal((await admin.patch(`/api/equipamentos/${novo.corpo.id}`, { nome: 'Monitor vertical' })).status, 200);
+
+    // tipo novo criado pelo cadastro
+    const tipo = await admin.post('/api/tipos', { nome: 'Pedal' });
+    assert.equal((await admin.post(`/api/baias/${baiaId}/equipamentos`, { tipo_id: tipo.corpo.id, nome: 'Pedal' })).status, 201);
+
+    const coord = await amb.cliente('coord');
+    assert.equal((await coord.post(`/api/baias/${baiaId}/equipamentos`, { tipo_id: monitor, nome: 'Indevido' })).status, 403);
+    const cl = await iniciar(coord, centralId);
+    assert.equal((await coord.get(`/api/checklists/${cl.id}`)).corpo.total, 9);
+    await admin.patch(`/api/equipamentos/${novo.corpo.id}`, { ativo: false });
+    assert.equal((await coord.get(`/api/checklists/${cl.id}`)).corpo.total, 8);
+    await admin.patch(`/api/equipamentos/${novo.corpo.id}`, { ativo: true });
+    const det = (await admin.get(`/api/centrais/${centralId}`)).corpo;
+    assert.ok(det.baias[0].equipamentos.some((e: any) => e.nome === 'Monitor vertical' && e.ativo));
+  } finally { await amb.fechar(); }
+});

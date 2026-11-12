@@ -125,4 +125,11 @@ function migrar(db: Db): void {
       db.pragma('user_version = 1');
     })();
   }
+  if (versao < 2) {
+    // Versão da sessão: sair, trocar a senha ou desativar a conta aumenta o número e derruba os tokens antigos.
+    db.transaction(() => {
+      db.exec('ALTER TABLE usuarios ADD COLUMN sessao_versao INTEGER NOT NULL DEFAULT 0');
+      db.pragma('user_version = 2');
+    })();
+  }
 }

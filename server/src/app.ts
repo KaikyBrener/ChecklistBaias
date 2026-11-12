@@ -6,13 +6,13 @@ import { z, ZodError } from 'zod';
 import type { Db } from './db.js';
 import { ErroDominio } from './errors.js';
 import {
-  assinarSessao, autenticar, COOKIE, confereSenha, exigir, hashSenha, LimiteLogin, opcoesCookie,
+  assinarSessao, autenticar, COOKIE, confereSenha, encerrarSessoes, exigir, hashSenha, LimiteLogin, opcoesCookie,
 } from './auth.js';
 import { turnoDe } from './time.js';
 import { montarPainel, type ConfigApp } from './painel.js';
 import {
   adicionarEquipamento, atualizarBaia, atualizarCentral, atualizarEquipamento, atualizarUsuario, criarBaias,
-  criarCentral, criarUsuario, detalharCentral, garantirTipo, listarCentrais, listarTipos, listarUsuarios,
+  criarCentral, criarUsuario, detalharCentral, garantirTipo, listarCentrais, listarTipos, listarUsuarios, trocarPropriaSenha,
 } from './cadastro.js';
 import {
   concluirChecklist, detalharChecklist, iniciarChecklist, listarChecklists, responderItem, tudoOkDaBaia,
@@ -88,8 +88,8 @@ export function criarApp(o: OpcoesApp) {
     const { login, senha } = z.object({ login: z.string().min(1).max(80), senha: z.string().min(1).max(200) }).parse(req.body);
     const chave = `${req.ip}|${login.toLowerCase()}`;
     limite.checar(chave);
-    const u = db.prepare('SELECT id, nome, papel, senha_hash, ativo FROM usuarios WHERE login = ?').get(login) as
-      | { id: number; nome: string; papel: 'ADMIN' | 'TI' | 'COORDENADOR' | 'GERENTE'; senha_hash: string; ativo: number }
+    const u = db.prepare('SELECT id, nome, papel, senha_hash, ativo, sessao_versao FROM usuarios WHERE login = ?').get(login) as
+      | { id: number; nome: string; papel: 'ADMIN' | 'TI' | 'COORDENADOR' | 'GERENTE'; senha_hash: string; ativo: number; sessao_versao: number }
       | undefined;
     const ok = confereSenha(senha, u?.senha_hash ?? HASH_FALSO) && !!u && !!u.ativo;
     if (!ok || !u) {
@@ -97,12 +97,33 @@ export function criarApp(o: OpcoesApp) {
       throw new ErroDominio(401, 'Login ou senha incorretos.');
     }
     limite.sucesso(chave);
-    res.cookie(COOKIE, assinarSessao(u, o.segredo), opcoesCookie(!!o.cookieSeguro));
+    res.cookie(COOKIE, assinarSessao(u, u.sessao_versao, o.segredo), opcoesCookie(!!o.cookieSeguro));
     res.json({ id: u.id, nome: u.nome, papel: u.papel });
   });
 
-  api.post('/auth/logout', (_req, res) => {
+  // Sair invalida o token no servidor (em todos os aparelhos do usuário), não só apaga o cookie.
+  api.post('/auth/logout', (req, res) => {
+    if (req.usuario) encerrarSessoes(db, req.usuario.id);
     res.clearCookie(COOKIE, { path: '/' });
+    res.json({ ok: true });
+  });
+
+  // Cada pessoa troca a própria senha (a inicial é combinada com o administrador).
+  api.post('/auth/senha', logado, (req, res) => {
+    const { atual, nova } = z.object({ atual: z.string().min(1).max(200), nova: z.string().min(1).max(200) }).parse(req.body);
+    if (o.demo) throw new ErroDominio(403, 'Na demonstração as senhas são fixas.');
+    const chave = `senha|${req.usuario!.id}`;
+    limite.checar(chave);
+    let versao: number;
+    try {
+      versao = trocarPropriaSenha(db, req.usuario!.id, atual, nova);
+    } catch (e) {
+      if (e instanceof ErroDominio && e.message.startsWith('A senha atual')) limite.falhou(chave);
+      throw e;
+    }
+    limite.sucesso(chave);
+    // As outras sessões caíram; esta continua com um token novo.
+    res.cookie(COOKIE, assinarSessao(req.usuario!, versao, o.segredo), opcoesCookie(!!o.cookieSeguro));
     res.json({ ok: true });
   });
 

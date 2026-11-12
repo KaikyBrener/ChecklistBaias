@@ -34,8 +34,15 @@ export function confereSenha(senha: string, guardada: string): boolean {
   return crypto.timingSafeEqual(esperado, h);
 }
 
-export function assinarSessao(u: UsuarioSessao, segredo: string): string {
-  return jwt.sign({ sub: String(u.id) }, segredo, { expiresIn: `${DURACAO_HORAS}h` });
+/** `versao` é a `sessao_versao` do usuário no momento do login; se ela mudar no banco, o token deixa de valer. */
+export function assinarSessao(u: { id: number }, versao: number, segredo: string): string {
+  return jwt.sign({ sub: String(u.id), v: versao }, segredo, { expiresIn: `${DURACAO_HORAS}h` });
+}
+
+/** Derruba todas as sessões abertas do usuário e devolve a nova versão. */
+export function encerrarSessoes(db: Db, usuarioId: number): number {
+  db.prepare('UPDATE usuarios SET sessao_versao = sessao_versao + 1 WHERE id = ?').run(usuarioId);
+  return (db.prepare('SELECT sessao_versao AS v FROM usuarios WHERE id = ?').get(usuarioId) as { v: number }).v;
 }
 
 export const opcoesCookie = (seguro: boolean) => ({
@@ -46,16 +53,19 @@ export const opcoesCookie = (seguro: boolean) => ({
   path: '/',
 });
 
-/** Lê o cookie, confere o usuário no banco a cada requisição (desativar um usuário vale na hora). */
+/**
+ * Lê o cookie e confere o usuário no banco a cada requisição: desativar a conta, sair ou trocar a senha
+ * vale na hora, porque a versão guardada no token deixa de bater com a do banco.
+ */
 export function autenticar(db: Db, segredo: string) {
-  const busca = db.prepare('SELECT id, nome, papel FROM usuarios WHERE id = ? AND ativo = 1');
+  const busca = db.prepare('SELECT id, nome, papel, sessao_versao FROM usuarios WHERE id = ? AND ativo = 1');
   return (req: Request, _res: Response, next: NextFunction) => {
     const token = (req.cookies as Record<string, string> | undefined)?.[COOKIE];
     if (token) {
       try {
-        const dados = jwt.verify(token, segredo) as { sub: string };
-        const u = busca.get(Number(dados.sub)) as UsuarioSessao | undefined;
-        if (u) req.usuario = u;
+        const dados = jwt.verify(token, segredo) as { sub: string; v?: number };
+        const u = busca.get(Number(dados.sub)) as (UsuarioSessao & { sessao_versao: number }) | undefined;
+        if (u && (dados.v ?? 0) === u.sessao_versao) req.usuario = { id: u.id, nome: u.nome, papel: u.papel };
       } catch {
         /* token inválido ou expirado: segue como não autenticado */
       }
