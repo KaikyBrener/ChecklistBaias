@@ -7,6 +7,7 @@ import { Carregando, Falha, Vazio } from '../components/Estado';
 import { Icone } from '../components/Icone';
 import { CabecalhoPagina, Secao } from '../components/Pagina';
 import { Selo } from '../components/Selo';
+import { BaiasDaCentral } from './CadastroBaias';
 
 interface Central { id: number; nome: string; ativa: number; baias: number; equipamentos: number }
 interface Usuario { id: number; nome: string; login: string; papel: Papel; ativo: number }
@@ -15,7 +16,7 @@ type Retorno = { tom: 'sucesso' | 'erro'; texto: string } | null;
 export function Cadastro() {
   return (
     <>
-      <CabecalhoPagina titulo="Cadastro">Centrais, baias e quem pode entrar no sistema.</CabecalhoPagina>
+      <CabecalhoPagina titulo="Cadastro">Centrais, baias, equipamentos e quem pode entrar no sistema.</CabecalhoPagina>
       <div className="cadastro-grade"><Centrais /><Usuarios /></div>
     </>
   );
@@ -47,13 +48,13 @@ function Centrais() {
   }
 
   return (
-    <Secao titulo="Centrais e baias" descricao="Cada baia nova já vem com monitores, computador, headset, teclado e mouse, telefone e nobreak.">
+    <Secao titulo="Centrais e baias" descricao="Cada baia nova já vem com monitores, computador, headset, teclado e mouse, telefone e nobreak. Abra “Baias e equipamentos” para ajustar o que cada uma tem.">
       {retorno && <Aviso tom={retorno.tom} onFechar={() => setRetorno(null)}>{retorno.texto}</Aviso>}
       {erro && !dados ? <Falha mensagem={erro} onTentar={recarregar} /> : !dados ? <Carregando texto="Carregando centrais…" /> : dados.length === 0 ? (
         <Vazio icone="predio" titulo="Nenhuma central ainda">Crie a primeira central abaixo e depois adicione as baias.</Vazio>
       ) : (
         <ul className="lista-cad">
-          {dados.map((c) => <LinhaCentral key={c.id} c={c} ocupado={enviando === `c${c.id}`}
+          {dados.map((c) => <LinhaCentral key={c.id} c={c} ocupado={enviando === `c${c.id}`} onMudou={recarregar}
             onAdicionar={(de, ate) => tentar(`c${c.id}`, () => post(`/centrais/${c.id}/baias`, { de, ate }),
               de === ate ? `Baia ${de} adicionada à ${c.nome}.` : `Baias ${de} a ${ate} adicionadas à ${c.nome}.`)} />)}
         </ul>
@@ -71,7 +72,9 @@ function Centrais() {
   );
 }
 
-function LinhaCentral({ c, ocupado, onAdicionar }: { c: Central; ocupado: boolean; onAdicionar: (de: number, ate: number) => Promise<boolean> }) {
+function LinhaCentral({ c, ocupado, onAdicionar, onMudou }: { c: Central; ocupado: boolean; onAdicionar: (de: number, ate: number) => Promise<boolean>; onMudou: () => void }) {
+  const [verBaias, setVerBaias] = useState(false);
+  const [versao, setVersao] = useState(0); // recarrega a lista de baias quando novas são adicionadas
   const proxima = String(c.baias + 1);
   const [de, setDe] = useState(proxima);
   const [ate, setAte] = useState(proxima);
@@ -90,11 +93,14 @@ function LinhaCentral({ c, ocupado, onAdicionar }: { c: Central; ocupado: boolea
           <span className="muted small num">{c.baias} baias · {c.equipamentos} equipamentos</span>
         </div>
         {!c.ativa && <Selo>Inativa</Selo>}
+        <button type="button" className="btn peq" aria-expanded={verBaias} onClick={() => setVerBaias(!verBaias)}>
+          <Icone nome={verBaias ? 'baixo' : 'direita'} tamanho={15} />Baias e equipamentos
+        </button>
       </div>
       <form className="form-linha" noValidate onSubmit={async (e) => {
         e.preventDefault(); setTocado(true);
         if (erro) return;
-        if (await onAdicionar(Number(de), Number(ate))) { const n = String(Number(ate) + 1); setDe(n); setAte(n); setTocado(false); }
+        if (await onAdicionar(Number(de), Number(ate))) { const n = String(Number(ate) + 1); setDe(n); setAte(n); setTocado(false); setVersao((v) => v + 1); }
       }}>
         <Campo rotulo="Adicionar baias, da" erro={erroDe}>
           {(p) => <input {...p} type="number" inputMode="numeric" min={1} value={de} onChange={(e) => setDe(e.target.value)} onBlur={() => setTocado(true)} />}
@@ -104,6 +110,7 @@ function LinhaCentral({ c, ocupado, onAdicionar }: { c: Central; ocupado: boolea
         </Campo>
         <button className="btn" disabled={ocupado}>{ocupado ? 'Adicionando…' : qtd > 1 ? `Adicionar ${qtd} baias` : 'Adicionar baia'}</button>
       </form>
+      {verBaias && <BaiasDaCentral key={versao} centralId={c.id} onMudou={onMudou} />}
     </li>
   );
 }

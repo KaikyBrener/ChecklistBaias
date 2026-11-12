@@ -11,6 +11,7 @@ import { Icone, type NomeIcone } from './components/Icone';
 import { Marca } from './components/Marca';
 import { TurnoCard } from './components/TurnoCard';
 import { BotaoTema } from './components/Tema';
+import { TrocarSenha } from './components/TrocarSenha';
 
 interface Aba { id: '/checklist' | '/painel' | '/ocorrencias' | '/cadastro'; nome: string; icone: NomeIcone }
 
@@ -52,6 +53,7 @@ function Estrutura({ sessao, rota, onSair }: { sessao: Sessao; rota: string; onS
   const caminho = '/' + (rota.split('/')[1] ?? '');
   const ativa = abas.find((a) => a.id === caminho) ?? abas[0]!;
   const t = sessao.turnoAtual;
+  const [trocandoSenha, setTrocandoSenha] = useState(false);
 
   // Ao trocar de seção: título da aba do navegador e foco no conteúdo (leitores de tela anunciam a nova tela).
   const main = useRef<HTMLElement>(null);
@@ -81,8 +83,19 @@ function Estrutura({ sessao, rota, onSair }: { sessao: Sessao; rota: string; onS
         </nav>
         <TurnoCard turno={t.turno} inicio={t.inicio} fim={t.fim} tz={sessao.tz} />
         <div className="quem">
-          <span className="avatar" aria-hidden="true">{sessao.usuario.nome.trim().charAt(0).toUpperCase()}</span>
-          <span className="quem-nome"><b title={sessao.usuario.nome}>{sessao.usuario.nome}</b><small>{PAPEL_ROTULO[papel]}</small></span>
+          {sessao.demo ? (
+            <span className="quem-conta">
+              <span className="avatar" aria-hidden="true">{sessao.usuario.nome.trim().charAt(0).toUpperCase()}</span>
+              <span className="quem-nome"><b title={sessao.usuario.nome}>{sessao.usuario.nome}</b><small>{PAPEL_ROTULO[papel]}</small></span>
+            </span>
+          ) : (
+            // O nome é o botão da conta: abre a troca da própria senha.
+            <button type="button" className="quem-conta" onClick={() => setTrocandoSenha(true)} title="Trocar minha senha"
+              aria-label={`${sessao.usuario.nome}, ${PAPEL_ROTULO[papel]}. Trocar minha senha`}>
+              <span className="avatar" aria-hidden="true">{sessao.usuario.nome.trim().charAt(0).toUpperCase()}</span>
+              <span className="quem-nome"><b>{sessao.usuario.nome}</b><small>Trocar senha</small></span>
+            </button>
+          )}
           <BotaoTema />
           <button type="button" className="icone-btn" onClick={onSair} title="Sair do sistema" aria-label="Sair do sistema"><Icone nome="sair" /></button>
         </div>
@@ -91,6 +104,7 @@ function Estrutura({ sessao, rota, onSair }: { sessao: Sessao; rota: string; onS
         {sessao.demo && <div className="faixa-demo">Demonstração com dados fictícios</div>}
         <main id="conteudo" ref={main} tabIndex={-1}>{tela}</main>
       </div>
+      {trocandoSenha && <TrocarSenha onFechar={() => setTrocandoSenha(false)} />}
     </div>
   );
 }
